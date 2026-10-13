@@ -22,7 +22,25 @@
     .mono { font-family: 'JetBrains Mono', monospace; }
     input[type=range] { accent-color: #4f46e5; }
     .tab-panel[hidden] { display: none !important; }
-  #instructionsDrawer{position:fixed;right:0;top:0;height:100dvh;width:min(460px,100%);z-index:70;background:white;padding:24px;overflow:auto;box-shadow:-12px 0 40px #0f172a33}#instructionsOverlay{position:fixed;inset:0;background:#0f172a66;z-index:60}#instructionsDrawer[hidden],#instructionsOverlay[hidden]{display:none!important}</style>
+  #instructionsDrawer{position:fixed;right:0;top:0;height:100dvh;width:min(460px,100%);z-index:70;background:white;padding:24px;overflow:auto;box-shadow:-12px 0 40px #0f172a33}#instructionsOverlay{position:fixed;inset:0;background:#0f172a66;z-index:60}#instructionsDrawer[hidden],#instructionsOverlay[hidden]{display:none!important}
+#mobilePanelBackdrop{display:none}#mobilePanelClose{display:none}
+@media(max-width:1023px){
+body{height:100dvh;overflow:hidden}body>header{position:relative;flex:none}body>main{height:calc(100dvh - var(--lesson-header-height,150px));min-height:0;display:block;padding:8px}
+body>main>section{height:100%;min-height:0}
+body>main>section>div:first-child{min-height:0!important;height:100%;flex:1}
+#canvas3d{min-height:0;height:100%;touch-action:none}
+#rectStats{display:none}
+body>main>aside{display:none;position:fixed;inset:auto 8px 8px;max-height:75dvh;z-index:55;background:white;border-radius:20px;overflow:auto;box-shadow:0 -8px 40px #0f172a55;padding:46px 0 0}
+body>main>aside.mobile-open{display:flex}
+#mobilePanelClose{display:block;position:sticky;top:0;align-self:flex-end;margin:-40px 12px 0;min-width:44px;min-height:44px;background:#e2e8f0;border-radius:12px;font-size:20px;z-index:2}
+#mobilePanelBackdrop.mobile-open{display:block;position:fixed;inset:0;background:#0f172a55;z-index:50}
+.tab-btn,#openInstructions{min-height:42px;padding:8px 10px;font-size:12px}
+#btnReset,#btnTrans,#btnWire{min-height:44px;min-width:44px;font-size:14px}
+#canvas3d~div label{min-height:38px;font-size:12px}
+input[type=checkbox]{width:18px;height:18px}
+#parameterControls input[type=range]{min-height:32px}
+}
+</style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
   <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-40">
@@ -38,7 +56,7 @@
       </div>
       <nav class="flex flex-wrap items-center gap-2" aria-label="Розділи інтерактиву"><button id="openInstructions" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100">Інструкція</button>
         <button id="btnTabModel" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-800 shadow-sm flex items-center gap-1.5" data-mode="model">
-          <i class="fa-solid fa-shapes"></i> 3D-дослідження
+          <i class="fa-solid fa-shapes"></i> Налаштування
         </button>
         <button id="btnTabProps" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="properties">
           <i class="fa-solid fa-list-check"></i> Властивості
@@ -114,7 +132,7 @@
       </div>
     </section>
 
-    <aside class="lg:col-span-4 flex flex-col gap-3">
+    <aside class="lg:col-span-4 flex flex-col gap-3" id="mobileLessonPanel"><button id="mobilePanelClose" aria-label="Закрити панель">✕</button>
       
 <div id="panelModel" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4">
         <div>
@@ -220,8 +238,8 @@
 
     function init3D() {
       const container = els.canvas3d;
-      const width = Math.max(container.clientWidth, 320);
-      const height = Math.max(container.clientHeight, 500);
+      const width = Math.max(container.clientWidth, 1);
+      const height = Math.max(container.clientHeight, 1);
 
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0f172a);
@@ -264,8 +282,8 @@
 
     function onResize() {
       if (!renderer || !camera || !els.canvas3d) return;
-      const w = Math.max(els.canvas3d.clientWidth, 320);
-      const h = Math.max(els.canvas3d.clientHeight, 500);
+      const w = Math.max(els.canvas3d.clientWidth, 1);
+      const h = Math.max(els.canvas3d.clientHeight, 1);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -583,5 +601,14 @@ instructionsButton.addEventListener('click',()=>toggleInstructions(true));
 document.getElementById('closeInstructions').addEventListener('click',()=>toggleInstructions(false));
 instructionsOverlay.addEventListener('click',()=>toggleInstructions(false));
 document.addEventListener('keydown',e=>{if(!instructionsDrawer.hidden){if(e.key==='Escape')toggleInstructions(false);if(e.key==='Tab'){e.preventDefault();document.getElementById('closeInstructions').focus();}}});
+</script><div id="mobilePanelBackdrop"></div><script>
+const lessonPanel=document.getElementById('mobileLessonPanel'),panelBackdrop=document.getElementById('mobilePanelBackdrop');
+function closeMobilePanel(){lessonPanel.classList.remove('mobile-open');panelBackdrop.classList.remove('mobile-open');onResize();}
+document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{if(window.matchMedia('(max-width:1023px)').matches){lessonPanel.classList.add('mobile-open');panelBackdrop.classList.add('mobile-open');}}));
+document.getElementById('mobilePanelClose').addEventListener('click',closeMobilePanel);
+panelBackdrop.addEventListener('click',closeMobilePanel);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobilePanel();});
+function fitModelViewport(){document.documentElement.style.setProperty('--lesson-header-height',document.querySelector('body>header').getBoundingClientRect().height+'px');onResize();}
+window.addEventListener('resize',fitModelViewport);window.addEventListener('load',fitModelViewport);
 </script></body>
 </html>
