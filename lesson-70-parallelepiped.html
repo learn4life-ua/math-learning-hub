@@ -164,8 +164,8 @@ input[type=checkbox]{width:18px;height:18px}
             <input type="range" id="rngSkew" min="30" max="150" step="5" value="65" class="w-full cursor-pointer" /><p id="baseAngleNote" class="text-xs text-slate-600 mt-2"></p>
           </div>
           <div id="obliqueControl" class="hidden">
-            <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Нахил бічних ребер:</span><span id="labelTilt" class="mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">70°</span></div>
-            <input type="range" id="rngTilt" min="50" max="85" step="5" value="70" class="w-full cursor-pointer" />
+            <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Кут між AA₁ і площиною основи:</span><span id="labelTilt" class="mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">70°</span></div>
+            <input type="range" id="rngTilt" min="30" max="85" step="5" value="70" class="w-full cursor-pointer" /><p id="lateralAngleNote" class="text-xs text-slate-600 mt-2"></p>
           </div>
         </div>
 
@@ -430,6 +430,24 @@ input[type=checkbox]{width:18px;height:18px}
         angleLabel.position.set(v[0].x+radius*1.6*Math.cos(alpha/2),0.12,v[0].z-radius*1.6*Math.sin(alpha/2));
         mainGroup.add(angleLabel);
       }
+      if(shapeType==='general'){
+        const alpha=lateralAngleDeg*Math.PI/180;
+        const projection=new THREE.Vector3(v[4].x,0,v[4].z);
+        addLine(v[0],projection,0xfb923c,true);
+        addLine(projection,v[4],0x34d399,true);
+        addLine(v[0],v[4],0xfb923c);
+        const labelH=createTextSprite('H','#fb923c',0.8);
+        labelH.position.copy(projection).add(new THREE.Vector3(0,-0.24,0));mainGroup.add(labelH);
+        const radius=Math.min(paramC*0.25,1);
+        const arcPoints=[];
+        for(let i=0;i<=40;i++){const t=alpha*i/40;arcPoints.push(new THREE.Vector3(v[0].x+radius*Math.cos(t),radius*Math.sin(t),v[0].z));}
+        mainGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arcPoints),new THREE.LineBasicMaterial({color:0xfb923c})));
+        const label=createTextSprite('∠A₁AH = '+lateralAngleDeg+'°','#fb923c',0.85);
+        label.position.set(v[0].x+radius*1.8*Math.cos(alpha/2),radius*1.8*Math.sin(alpha/2),v[0].z);mainGroup.add(label);
+        const size=Math.min(paramC*Math.cos(alpha),paramC*Math.sin(alpha),0.3)*0.5;
+        const rightAngle=[new THREE.Vector3(projection.x-size,0,projection.z),new THREE.Vector3(projection.x-size,size,projection.z),new THREE.Vector3(projection.x,size,projection.z)];
+        mainGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rightAngle),new THREE.LineBasicMaterial({color:0x34d399})));
+      }
       updateCalculations();
     }
 
@@ -461,6 +479,7 @@ input[type=checkbox]{width:18px;height:18px}
       els.labelSkew.textContent = `${baseAngleDeg}°`;
       $("baseAngleNote").textContent=`∠DAB = ∠BCD = ${baseAngleDeg}°. ∠ABC = ∠CDA = ${180-baseAngleDeg}°. На екрані кути спотворюються перспективою. Діапазон 30–150° — обмеження моделі; для невиродженої основи 0° < α < 180°.`;
       els.labelTilt.textContent = `${lateralAngleDeg}°`;
+      $("lateralAngleNote").textContent=`H — ортогональна проєкція A₁ на площину ABCD. Кут нахилу ∠A₁AH = ${lateralAngleDeg}°. AA₁ = c; AH = c·cos α; A₁H = c·sin α — висота. Проєкція може виходити за межі грані. Для прямого паралелепіпеда нахил дорівнює 90°. Діапазон 30–85° — обмеження похилої моделі.`;
       els.skewControl.classList.toggle('hidden', !(shapeType === 'direct' || shapeType === 'general'));
       els.obliqueControl.classList.toggle('hidden', shapeType !== 'general');
 
