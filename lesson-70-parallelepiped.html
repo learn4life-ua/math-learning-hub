@@ -33,10 +33,10 @@
         </div>
         <div>
           <h1 class="font-bold text-lg sm:text-xl leading-tight">Заняття 70. Паралелепіпед</h1>
-          <p class="text-xs text-indigo-200">Геометрія · 11 клас · 3D-дослідження, властивості, теорема, тренажер</p>
+          <p class="text-xs text-indigo-200">3D-дослідження, властивості, теорема, тренажер</p>
         </div>
       </div>
-      <nav class="flex flex-wrap items-center gap-2" aria-label="Розділи інтерактиву"><button class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100" data-mode="instructions">Інструкція</button>
+      <nav class="flex flex-wrap items-center gap-2" aria-label="Розділи інтерактиву">
         <button id="btnTabModel" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-800 shadow-sm flex items-center gap-1.5" data-mode="model">
           <i class="fa-solid fa-shapes"></i> 3D-дослідження
         </button>
@@ -53,7 +53,10 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto w-full p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+  <div id="visibleInstructions" class="max-w-7xl w-[calc(100%-24px)] mx-auto mt-4 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+<h2 class="font-bold text-slate-900">Як працювати із заняттям</h2><p class="text-sm">Мета: розрізняти види паралелепіпедів, пояснювати їхні властивості та обчислювати діагональ прямокутного паралелепіпеда.</p>
+<ol class="list-decimal pl-5 space-y-3 text-sm"><li>У «3D-дослідженні» послідовно обери паралелепіпед, прямий, прямокутний і куб. Порівняй основи та бічні грані.</li><li>Повертай модель перетягуванням. Змінюй масштаб колесом миші або жестом двох пальців. Кнопка зі стрілкою повертає камеру.</li><li>Увімкни «Протилежні грані» та «4 діагоналі + O». Досліди паралельність граней і спільну середину діагоналей.</li><li>Змінюй довжини ребер і кути. Кут нахилу — кут між бічним ребром і площиною основи. Для похилої моделі висота не дорівнює довжині бічного ребра.</li><li>Відкрий «Властивості». Запиши означення та основні властивості в зошит.</li><li>Відкрий «Теорема про діагональ»: модель стане прямокутною, на ній буде виділено трикутник ACC₁. Простеж два застосування теореми Піфагора. Обчисли діагональ самостійно й порівняй результат.</li><li>Виконай п’ять завдань тренажера та прочитай пояснення. Переглянь підсумок і за потреби почни нову спробу.</li></ol><p class="text-xs text-slate-500">Самоперевірка: поясни відмінність прямого й прямокутного паралелепіпедів та умови застосування формули діагоналі.</p></div>
+<main class="max-w-7xl mx-auto w-full p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
     <section class="lg:col-span-8 flex flex-col gap-3">
       <div class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 shadow-md relative flex flex-col flex-1 min-h-[500px] sm:min-h-[560px]">
         <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
@@ -114,9 +117,7 @@
     </section>
 
     <aside class="lg:col-span-4 flex flex-col gap-3">
-      <div id="panelInstructions" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3" hidden>
-<h2 class="font-bold text-slate-900">Як працювати із заняттям</h2><p class="text-sm">Мета: розрізняти види паралелепіпедів, пояснювати їхні властивості та обчислювати діагональ прямокутного паралелепіпеда.</p>
-<ol class="list-decimal pl-5 space-y-3 text-sm"><li>У «3D-дослідженні» послідовно обери паралелепіпед, прямий, прямокутний і куб. Порівняй основи та бічні грані.</li><li>Повертай модель перетягуванням. Змінюй масштаб колесом миші або жестом двох пальців. Кнопка зі стрілкою повертає камеру.</li><li>Увімкни «Протилежні грані» та «4 діагоналі + O». Досліди паралельність граней і спільну середину діагоналей.</li><li>Змінюй довжини ребер і кути. Кут нахилу — кут між бічним ребром і площиною основи. Для похилої моделі висота не дорівнює довжині бічного ребра.</li><li>Відкрий «Властивості». Запиши означення та основні властивості в зошит.</li><li>Відкрий «Теорема про діагональ»: модель стане прямокутною, на ній буде виділено трикутник ACC₁. Простеж два застосування теореми Піфагора. Обчисли діагональ самостійно й порівняй результат.</li><li>Виконай п’ять завдань тренажера та прочитай пояснення. Переглянь підсумок і за потреби почни нову спробу.</li></ol><p class="text-xs text-slate-500">Самоперевірка: поясни відмінність прямого й прямокутного паралелепіпедів та умови застосування формули діагоналі.</p></div>
+      
 <div id="panelModel" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4">
         <div>
           <h2 class="font-bold text-slate-900 text-sm flex items-center gap-2"><i class="fa-solid fa-layer-group text-indigo-600"></i> Види паралелепіпедів</h2>
@@ -468,7 +469,7 @@
       activeMode = mode;
       if(mode==='theorem' && shapeType!=='rect' && shapeType!=='cube')setShape('rect');
       buildModel();
-      const map = { instructions:'panelInstructions', model:'panelModel', properties:'panelProperties', theorem:'panelTheorem', tasks:'panelTasks' };
+      const map = { model:'panelModel', properties:'panelProperties', theorem:'panelTheorem', tasks:'panelTasks' };
       Object.entries(map).forEach(([key,id]) => $(id).hidden = key !== mode);
       document.querySelectorAll('.tab-btn').forEach(btn => {
         const active = btn.dataset.mode === mode;
@@ -571,7 +572,7 @@
 
       syncControls();
       loadTask(0);
-      setMode('instructions');
+      setMode('model');
       init3D();
     });
   </script>
