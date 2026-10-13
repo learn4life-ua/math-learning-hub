@@ -160,8 +160,8 @@ input[type=checkbox]{width:18px;height:18px}
             <input type="range" id="rngC" min="2" max="8" step="0.5" value="5" class="w-full cursor-pointer" />
           </div>
           <div id="skewControl" class="hidden">
-            <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Кут основи:</span><span id="labelSkew" class="mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">65°</span></div>
-            <input type="range" id="rngSkew" min="45" max="85" step="5" value="65" class="w-full cursor-pointer" />
+            <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Кут основи ∠DAB:</span><span id="labelSkew" class="mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">65°</span></div>
+            <input type="range" id="rngSkew" min="30" max="150" step="5" value="65" class="w-full cursor-pointer" /><p id="baseAngleNote" class="text-xs text-slate-600 mt-2"></p>
           </div>
           <div id="obliqueControl" class="hidden">
             <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Нахил бічних ребер:</span><span id="labelTilt" class="mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">70°</span></div>
@@ -419,6 +419,17 @@ input[type=checkbox]{width:18px;height:18px}
       }
 
       if(activeMode==="theorem" && (shapeType==="rect"||shapeType==="cube")){addLine(v[0],v[2],0x22d3ee);addLine(v[2],v[6],0x34d399);addLine(v[0],v[6],0xfb7185);}
+      {
+        const alpha=(shapeType==='direct'||shapeType==='general')?baseAngleDeg*Math.PI/180:Math.PI/2;
+        const radius=Math.min(paramA,paramB)*0.28;
+        const arcPoints=[];
+        for(let i=0;i<=40;i++){const t=alpha*i/40;arcPoints.push(new THREE.Vector3(v[0].x+radius*Math.cos(t),0.025,v[0].z-radius*Math.sin(t)));}
+        const arcGeometry=new THREE.BufferGeometry().setFromPoints(arcPoints);
+        mainGroup.add(new THREE.Line(arcGeometry,new THREE.LineBasicMaterial({color:0xfbbf24})));
+        const angleLabel=createTextSprite('∠DAB = '+Math.round(alpha*180/Math.PI)+'°','#fbbf24',0.85);
+        angleLabel.position.set(v[0].x+radius*1.6*Math.cos(alpha/2),0.12,v[0].z-radius*1.6*Math.sin(alpha/2));
+        mainGroup.add(angleLabel);
+      }
       updateCalculations();
     }
 
@@ -448,6 +459,7 @@ input[type=checkbox]{width:18px;height:18px}
       els.labelB.textContent = `${paramB} см`;
       els.labelC.textContent = `${paramC} см`;
       els.labelSkew.textContent = `${baseAngleDeg}°`;
+      $("baseAngleNote").textContent=`∠DAB = ∠BCD = ${baseAngleDeg}°. ∠ABC = ∠CDA = ${180-baseAngleDeg}°. На екрані кути спотворюються перспективою. Діапазон 30–150° — обмеження моделі; для невиродженої основи 0° < α < 180°.`;
       els.labelTilt.textContent = `${lateralAngleDeg}°`;
       els.skewControl.classList.toggle('hidden', !(shapeType === 'direct' || shapeType === 'general'));
       els.obliqueControl.classList.toggle('hidden', shapeType !== 'general');
