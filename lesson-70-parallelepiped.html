@@ -36,7 +36,7 @@
           <p class="text-xs text-indigo-200">Геометрія · 11 клас · 3D-дослідження, властивості, теорема, тренажер</p>
         </div>
       </div>
-      <nav class="flex flex-wrap items-center gap-2" aria-label="Розділи інтерактиву">
+      <nav class="flex flex-wrap items-center gap-2" aria-label="Розділи інтерактиву"><button class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100" data-mode="instructions">Інструкція</button>
         <button id="btnTabModel" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-800 shadow-sm flex items-center gap-1.5" data-mode="model">
           <i class="fa-solid fa-shapes"></i> 3D-дослідження
         </button>
@@ -59,7 +59,7 @@
         <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
           <div class="pointer-events-auto bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 text-white text-xs flex items-center gap-2 shadow">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            <span id="currentTypeBadge" class="font-bold">Прямокутний паралелепіпед</span>
+            <span id="currentTypeBadge" class="font-bold">Паралелепіпед</span>
           </div>
           <div class="pointer-events-auto flex items-center gap-1.5 bg-slate-800/90 backdrop-blur-md p-1 rounded-xl border border-slate-700 shadow text-xs">
             <button id="btnReset" class="px-2.5 py-1 hover:bg-slate-700 text-slate-200 rounded-lg" title="Скинути камеру"><i class="fa-solid fa-arrows-rotate"></i></button>
@@ -114,7 +114,10 @@
     </section>
 
     <aside class="lg:col-span-4 flex flex-col gap-3">
-      <div id="panelModel" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4">
+      <div id="panelInstructions" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3" hidden>
+<h2 class="font-bold text-slate-900">Як працювати із заняттям</h2><p class="text-sm">Мета: розрізняти види паралелепіпедів, пояснювати їхні властивості та обчислювати діагональ прямокутного паралелепіпеда.</p>
+<ol class="list-decimal pl-5 space-y-3 text-sm"><li>У «3D-дослідженні» послідовно обери паралелепіпед, прямий, прямокутний і куб. Порівняй основи та бічні грані.</li><li>Повертай модель перетягуванням. Змінюй масштаб колесом миші або жестом двох пальців. Кнопка зі стрілкою повертає камеру.</li><li>Увімкни «Протилежні грані» та «4 діагоналі + O». Досліди паралельність граней і спільну середину діагоналей.</li><li>Змінюй довжини ребер і кути. Кут нахилу — кут між бічним ребром і площиною основи. Для похилої моделі висота не дорівнює довжині бічного ребра.</li><li>Відкрий «Властивості». Запиши означення та основні властивості в зошит.</li><li>Відкрий «Теорема про діагональ»: модель стане прямокутною, на ній буде виділено трикутник ACC₁. Простеж два застосування теореми Піфагора. Обчисли діагональ самостійно й порівняй результат.</li><li>Виконай п’ять завдань тренажера та прочитай пояснення. Переглянь підсумок і за потреби почни нову спробу.</li></ol><p class="text-xs text-slate-500">Самоперевірка: поясни відмінність прямого й прямокутного паралелепіпедів та умови застосування формули діагоналі.</p></div>
+<div id="panelModel" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4">
         <div>
           <h2 class="font-bold text-slate-900 text-sm flex items-center gap-2"><i class="fa-solid fa-layer-group text-indigo-600"></i> Види паралелепіпедів</h2>
           <p class="text-xs text-slate-500 mt-1">Рухайся від загального поняття до окремих видів.</p>
@@ -157,7 +160,7 @@
         <div class="space-y-2.5 text-xs text-slate-700 max-h-[530px] overflow-y-auto pr-1">
           <div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-indigo-900 block mb-1">Паралелепіпед</span>Призма, основами якої є паралелограми. Будь-яка його грань є паралелограмом.</div>
           <div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-indigo-900 block mb-1">Протилежні грані</span>Дві несусідні грані є протилежними. Вони лежать у паралельних площинах і є рівними.</div>
-          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-indigo-900 block mb-1">Діагоналі</span>Паралелепіпед має 4 діагоналі. Вони перетинаються в одній точці й діляться цією точкою навпіл.</div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-indigo-900 block mb-1">Діагоналі</span>Просторова діагональ — відрізок між вершинами, які не належать одній грані. Паралелепіпед має 4 просторові діагоналі. Вони перетинаються в одній точці й діляться цією точкою навпіл.</div>
           <div class="p-3 bg-sky-50 rounded-xl border border-sky-200"><span class="font-bold text-sky-900 block mb-1">Прямий паралелепіпед</span>Бічні ребра перпендикулярні до площини основи. Основи - паралелограми, бічні грані - прямокутники.</div>
           <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200"><span class="font-bold text-emerald-900 block mb-1">Прямокутний паралелепіпед</span>Прямий паралелепіпед, основами якого є прямокутники. Усі його грані - прямокутники.</div>
           <div class="p-3 bg-amber-50 rounded-xl border border-amber-200"><span class="font-bold text-amber-900 block mb-1">Виміри</span>Довжини трьох ребер прямокутного паралелепіпеда, що виходять з однієї вершини.</div>
@@ -174,12 +177,12 @@
             <div class="font-bold text-slate-900">Ідея доведення</div>
             <p>1. У прямокутній основі застосовуємо теорему Піфагора:</p>
             <div class="text-center">\[AC^2=AB^2+BC^2\]</div>
-            <p>2. У прямокутному трикутнику \(ACC_1\):</p>
+            <p>2. Оскільки \(CC_1\perp(ABCD)\), то \(CC_1\perp AC\). Трикутник \(ACC_1\) прямокутний, тому:</p>
             <div class="text-center">\[AC_1^2=AC^2+CC_1^2\]</div>
             <p>3. Підставляємо першу рівність у другу.</p>
           </div>
           <div id="calcFormulaStep" class="bg-rose-50 border border-rose-200 rounded-xl p-3 text-center mono text-rose-800"></div>
-          <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl"><b>Наслідок:</b> усі діагоналі прямокутного паралелепіпеда рівні.</div>
+          <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl"><b>Наслідок:</b> усі діагоналі прямокутного паралелепіпеда рівні. Для куба з ребром \(a\): \[d=a\sqrt{3}\]</div>
         </div>
       </div>
 
@@ -202,10 +205,10 @@
   </main>
 
   <script>
-    let shapeType = 'rect';
+    let shapeType = 'general';
     let paramA = 4, paramB = 3, paramC = 5;
     let baseAngleDeg = 65, lateralAngleDeg = 70;
-    let isTransparent = true, isWireframe = false;
+    let isTransparent = true, isWireframe = false, activeMode = "model";
     let scene, camera, renderer, controls, mainGroup;
 
     const els = {};
@@ -398,6 +401,7 @@
         });
       }
 
+      if(activeMode==="theorem" && (shapeType==="rect"||shapeType==="cube")){addLine(v[0],v[2],0x22d3ee);addLine(v[2],v[6],0x34d399);addLine(v[0],v[6],0xfb7185);}
       updateCalculations();
     }
 
@@ -407,8 +411,8 @@
       els.statC.textContent = `${paramC} см`;
       if (shapeType === 'rect' || shapeType === 'cube') {
         const d = Math.sqrt(paramA**2 + paramB**2 + paramC**2);
-        els.statD.textContent = `${d.toFixed(2)} см`;
-        els.calcFormulaStep.textContent = `d² = ${paramA}² + ${paramB}² + ${paramC}² = ${(paramA**2 + paramB**2 + paramC**2).toFixed(2)} ⇒ d ≈ ${d.toFixed(2)} см`;
+        els.statD.textContent = `${d.toFixed(2).replace(".",",")} см`;
+        els.calcFormulaStep.textContent = `d² = ${paramA}² + ${paramB}² + ${paramC}² = ${(paramA**2 + paramB**2 + paramC**2).toFixed(2)} ⇒ d ≈ ${d.toFixed(2).replace(".",",")} см`;
       } else {
         els.statD.textContent = '—';
         els.calcFormulaStep.textContent = 'Оберіть прямокутний паралелепіпед або куб, щоб виконати обчислення.';
@@ -445,6 +449,7 @@
         btn.className = `shape-btn px-2.5 py-2 text-xs font-bold rounded-xl border transition ${active ? 'bg-indigo-50 border-indigo-400 text-indigo-900' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`;
       });
       const validRect = shapeType === 'rect' || shapeType === 'cube';
+      document.querySelectorAll('#rectStats > div').forEach((card,i)=>{if(i<3)card.firstElementChild.textContent=(validRect?'Вимір ':'Довжина ребра ')+['a','b','c'][i];});
       els.chkMeasures.disabled = !validRect;
       els.chkMainDiag.disabled = !validRect;
       if (!validRect) { els.chkMeasures.checked = false; els.chkMainDiag.checked = false; }
@@ -460,7 +465,10 @@
     }
 
     function setMode(mode) {
-      const map = { model:'panelModel', properties:'panelProperties', theorem:'panelTheorem', tasks:'panelTasks' };
+      activeMode = mode;
+      if(mode==='theorem' && shapeType!=='rect' && shapeType!=='cube')setShape('rect');
+      buildModel();
+      const map = { instructions:'panelInstructions', model:'panelModel', properties:'panelProperties', theorem:'panelTheorem', tasks:'panelTasks' };
       Object.entries(map).forEach(([key,id]) => $(id).hidden = key !== mode);
       document.querySelectorAll('.tab-btn').forEach(btn => {
         const active = btn.dataset.mode === mode;
@@ -484,7 +492,7 @@
       },
       {
         q:'Знайдіть діагональ прямокутного паралелепіпеда, виміри якого дорівнюють 2 см, 3 см і 6 см.',
-        options:['7 см','11 см','√38 см','6.5 см'],
+        options:['7 см','11 см','√38 см','6,5 см'],
         correct:0,
         solution:'d² = 2² + 3² + 6² = 4 + 9 + 36 = 49, тому d = 7 см.'
       },
@@ -505,11 +513,14 @@
 
     function loadTask(idx) {
       currentTaskIndex = idx; taskAnswered = false;
+      $('btnNextTask').querySelector('span').textContent=idx===taskPool.length-1?'Показати підсумок':'Наступне завдання';
       const t = taskPool[idx];
       $('taskNumber').textContent = `Завдання ${idx+1} з ${taskPool.length}`;
       $('taskQuestion').textContent = t.q;
       const box = $('taskOptions'); box.innerHTML = '';
-      t.options.forEach((opt,i) => {
+      const options=t.options.map((text,index)=>({text,index}));
+      for(let j=options.length-1;j>0;j--){const k=Math.floor(Math.random()*(j+1));[options[j],options[k]]=[options[k],options[j]];}
+      options.forEach(({text:opt,index:i}) => {
         const b = document.createElement('button');
         b.className = 'w-full text-left p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold transition flex items-center justify-between';
         b.innerHTML = `<span>${opt}</span><i class="fa-regular fa-circle text-slate-400"></i>`;
@@ -555,12 +566,12 @@
       $('btnReset').addEventListener('click', () => { camera.position.set(11,9,13); controls.target.set(0,paramC/2,0); controls.update(); });
       els.btnTrans.addEventListener('click', () => { isTransparent = !isTransparent; els.btnTrans.classList.toggle('text-amber-400',!isTransparent); buildModel(); });
       els.btnWire.addEventListener('click', () => { isWireframe = !isWireframe; els.btnWire.classList.toggle('text-indigo-400',isWireframe); buildModel(); });
-      $('btnNextTask').addEventListener('click', () => loadTask((currentTaskIndex+1)%taskPool.length));
+      $('btnNextTask').addEventListener('click',()=>{if(currentTaskIndex<taskPool.length-1){loadTask(currentTaskIndex+1);return;}$('taskCard').innerHTML='<h3 class="font-bold">Роботу завершено</h3><p class="text-sm">Правильних відповідей: '+scoreCorrect+' із '+taskPool.length+'.</p><button id="restartQuiz" class="w-full py-2 bg-indigo-600 text-white rounded-xl">Пройти ще раз</button>';$('restartQuiz').addEventListener('click',()=>location.reload());});
       window.addEventListener('resize', onResize);
 
       syncControls();
       loadTask(0);
-      setMode('model');
+      setMode('instructions');
       init3D();
     });
   </script>
