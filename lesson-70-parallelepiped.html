@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Заняття 70. Паралелепіпед</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script>
+    MathJax = {
+      tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    :root { color-scheme: light; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    input[type=range] { accent-color: #4f46e5; }
+    .tab-panel[hidden] { display: none !important; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+  <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center font-bold text-xl border border-white/20">
+          <i class="fa-solid fa-cubes text-amber-300"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg sm:text-xl leading-tight">Заняття 70. Паралелепіпед</h1>
+          <p class="text-xs text-indigo-200">Геометрія · 11 клас · 3D-дослідження, властивості, теорема, тренажер</p>
+        </div>
+      </div>
+      <nav class="flex flex-wrap items-center gap-2" aria-label="Розділи інтерактиву">
+        <button id="btnTabModel" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-800 shadow-sm flex items-center gap-1.5" data-mode="model">
+          <i class="fa-solid fa-shapes"></i> 3D-дослідження
+        </button>
+        <button id="btnTabProps" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="properties">
+          <i class="fa-solid fa-list-check"></i> Властивості
+        </button>
+        <button id="btnTabTheorem" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="theorem">
+          <i class="fa-solid fa-square-root-variable"></i> Теорема про діагональ
+        </button>
+        <button id="btnTabTasks" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="tasks">
+          <i class="fa-solid fa-graduation-cap"></i> Тренажер
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto w-full p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+    <section class="lg:col-span-8 flex flex-col gap-3">
+      <div class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 shadow-md relative flex flex-col flex-1 min-h-[500px] sm:min-h-[560px]">
+        <div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+          <div class="pointer-events-auto bg-slate-800/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 text-white text-xs flex items-center gap-2 shadow">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span id="currentTypeBadge" class="font-bold">Прямокутний паралелепіпед</span>
+          </div>
+          <div class="pointer-events-auto flex items-center gap-1.5 bg-slate-800/90 backdrop-blur-md p-1 rounded-xl border border-slate-700 shadow text-xs">
+            <button id="btnReset" class="px-2.5 py-1 hover:bg-slate-700 text-slate-200 rounded-lg" title="Скинути камеру"><i class="fa-solid fa-arrows-rotate"></i></button>
+            <button id="btnTrans" class="px-2.5 py-1 hover:bg-slate-700 text-slate-200 rounded-lg" title="Прозорість граней"><i class="fa-solid fa-eye"></i> Грані</button>
+            <button id="btnWire" class="px-2.5 py-1 hover:bg-slate-700 text-slate-200 rounded-lg" title="Каркас"><i class="fa-solid fa-border-all"></i></button>
+          </div>
+        </div>
+
+        <div id="canvas3d" class="w-full h-full flex-1 cursor-grab active:cursor-grabbing"></div>
+
+        <div class="absolute bottom-3 left-3 right-3 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
+          <div class="pointer-events-auto flex flex-wrap gap-1.5 bg-slate-900/90 backdrop-blur-md p-2 rounded-xl border border-slate-700 text-xs text-white">
+            <label class="flex items-center gap-1.5 px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg cursor-pointer">
+              <input type="checkbox" id="chkOppFaces" />
+              <span class="text-violet-300 font-bold">Протилежні грані</span>
+            </label>
+            <label class="flex items-center gap-1.5 px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg cursor-pointer">
+              <input type="checkbox" id="chkAllDiags" />
+              <span class="text-amber-400 font-bold">4 діагоналі + O</span>
+            </label>
+            <label class="flex items-center gap-1.5 px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg cursor-pointer">
+              <input type="checkbox" id="chkMeasures" checked />
+              <span class="text-emerald-400 font-bold">Виміри a, b, c</span>
+            </label>
+            <label class="flex items-center gap-1.5 px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg cursor-pointer">
+              <input type="checkbox" id="chkMainDiag" checked />
+              <span class="text-rose-400 font-bold">Діагональ AC₁</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="rectStats" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Вимір a</div>
+          <div id="statA" class="text-lg font-bold text-indigo-600 mono mt-0.5">4 см</div>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Вимір b</div>
+          <div id="statB" class="text-lg font-bold text-cyan-600 mono mt-0.5">3 см</div>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Вимір c</div>
+          <div id="statC" class="text-lg font-bold text-emerald-600 mono mt-0.5">5 см</div>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Діагональ d</div>
+          <div id="statD" class="text-lg font-bold text-rose-600 mono mt-0.5">7.07 см</div>
+          <div class="text-[10px] text-slate-400">лише для прямокутного</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="lg:col-span-4 flex flex-col gap-3">
+      <div id="panelModel" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-4">
+        <div>
+          <h2 class="font-bold text-slate-900 text-sm flex items-center gap-2"><i class="fa-solid fa-layer-group text-indigo-600"></i> Види паралелепіпедів</h2>
+          <p class="text-xs text-slate-500 mt-1">Рухайся від загального поняття до окремих видів.</p>
+          <div class="grid grid-cols-2 gap-1.5 mt-3">
+            <button class="shape-btn px-2.5 py-2 text-xs font-bold rounded-xl border transition" data-shape="general">Паралелепіпед</button>
+            <button class="shape-btn px-2.5 py-2 text-xs font-bold rounded-xl border transition" data-shape="direct">Прямий</button>
+            <button class="shape-btn px-2.5 py-2 text-xs font-bold rounded-xl border transition" data-shape="rect">Прямокутний</button>
+            <button class="shape-btn px-2.5 py-2 text-xs font-bold rounded-xl border transition" data-shape="cube">Куб</button>
+          </div>
+        </div>
+
+        <div id="parameterControls" class="space-y-3 pt-3 border-t border-slate-100 text-xs">
+          <div>
+            <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Ребро a:</span><span id="labelA" class="mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">4 см</span></div>
+            <input type="range" id="rngA" min="2" max="8" step="0.5" value="4" class="w-full cursor-pointer" />
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Ребро b:</span><span id="labelB" class="mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">3 см</span></div>
+            <input type="range" id="rngB" min="2" max="8" step="0.5" value="3" class="w-full cursor-pointer" />
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1"><span id="labelCText" class="font-bold text-slate-700">Ребро c:</span><span id="labelC" class="mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded">5 см</span></div>
+            <input type="range" id="rngC" min="2" max="8" step="0.5" value="5" class="w-full cursor-pointer" />
+          </div>
+          <div id="skewControl" class="hidden">
+            <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Кут основи:</span><span id="labelSkew" class="mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">65°</span></div>
+            <input type="range" id="rngSkew" min="45" max="85" step="5" value="65" class="w-full cursor-pointer" />
+          </div>
+          <div id="obliqueControl" class="hidden">
+            <div class="flex justify-between items-center mb-1"><span class="font-bold text-slate-700">Нахил бічних ребер:</span><span id="labelTilt" class="mono font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">70°</span></div>
+            <input type="range" id="rngTilt" min="50" max="85" step="5" value="70" class="w-full cursor-pointer" />
+          </div>
+        </div>
+
+        <div id="shapeHint" class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 text-xs text-indigo-950 leading-relaxed"></div>
+      </div>
+
+      <div id="panelProperties" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3" hidden>
+        <h2 class="font-bold text-slate-900 text-sm flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-list-check text-indigo-600"></i> Властивості</h2>
+        <div class="space-y-2.5 text-xs text-slate-700 max-h-[530px] overflow-y-auto pr-1">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-indigo-900 block mb-1">Паралелепіпед</span>Призма, основами якої є паралелограми. Будь-яка його грань є паралелограмом.</div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-indigo-900 block mb-1">Протилежні грані</span>Дві несусідні грані є протилежними. Вони лежать у паралельних площинах і є рівними.</div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200"><span class="font-bold text-indigo-900 block mb-1">Діагоналі</span>Паралелепіпед має 4 діагоналі. Вони перетинаються в одній точці й діляться цією точкою навпіл.</div>
+          <div class="p-3 bg-sky-50 rounded-xl border border-sky-200"><span class="font-bold text-sky-900 block mb-1">Прямий паралелепіпед</span>Бічні ребра перпендикулярні до площини основи. Основи - паралелограми, бічні грані - прямокутники.</div>
+          <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200"><span class="font-bold text-emerald-900 block mb-1">Прямокутний паралелепіпед</span>Прямий паралелепіпед, основами якого є прямокутники. Усі його грані - прямокутники.</div>
+          <div class="p-3 bg-amber-50 rounded-xl border border-amber-200"><span class="font-bold text-amber-900 block mb-1">Виміри</span>Довжини трьох ребер прямокутного паралелепіпеда, що виходять з однієї вершини.</div>
+          <div class="p-3 bg-violet-50 rounded-xl border border-violet-200"><span class="font-bold text-violet-900 block mb-1">Куб</span>Прямокутний паралелепіпед, у якого всі три виміри рівні. Усі грані куба - квадрати.</div>
+        </div>
+      </div>
+
+      <div id="panelTheorem" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3" hidden>
+        <h2 class="font-bold text-slate-900 text-sm flex items-center gap-2 border-b pb-2"><i class="fa-solid fa-square-root-variable text-indigo-600"></i> Квадрат діагоналі</h2>
+        <div class="text-xs text-slate-700 leading-relaxed space-y-3">
+          <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl"><b>Теорема.</b> Квадрат будь-якої діагоналі прямокутного паралелепіпеда дорівнює сумі квадратів його трьох вимірів.</div>
+          <div class="text-center text-lg font-bold text-indigo-700 bg-white border border-indigo-200 rounded-xl p-3">\[d^2=a^2+b^2+c^2\]</div>
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <div class="font-bold text-slate-900">Ідея доведення</div>
+            <p>1. У прямокутній основі застосовуємо теорему Піфагора:</p>
+            <div class="text-center">\[AC^2=AB^2+BC^2\]</div>
+            <p>2. У прямокутному трикутнику \(ACC_1\):</p>
+            <div class="text-center">\[AC_1^2=AC^2+CC_1^2\]</div>
+            <p>3. Підставляємо першу рівність у другу.</p>
+          </div>
+          <div id="calcFormulaStep" class="bg-rose-50 border border-rose-200 rounded-xl p-3 text-center mono text-rose-800"></div>
+          <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl"><b>Наслідок:</b> усі діагоналі прямокутного паралелепіпеда рівні.</div>
+        </div>
+      </div>
+
+      <div id="panelTasks" class="tab-panel bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3" hidden>
+        <div class="flex justify-between items-center border-b pb-2">
+          <h2 class="font-bold text-slate-900 text-sm flex items-center gap-2"><i class="fa-solid fa-pen-ruler text-indigo-600"></i> Тренажер до заняття 70</h2>
+          <span id="quizScore" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full">0 / 0</span>
+        </div>
+        <div id="taskCard" class="space-y-3">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <div class="font-bold text-indigo-900 mb-1" id="taskNumber">Завдання 1</div>
+            <p id="taskQuestion" class="leading-relaxed text-slate-800"></p>
+          </div>
+          <div class="space-y-1.5" id="taskOptions"></div>
+          <div id="taskFeedback" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+          <button id="btnNextTask" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 opacity-50 pointer-events-none"><span>Наступне завдання</span><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    let shapeType = 'rect';
+    let paramA = 4, paramB = 3, paramC = 5;
+    let baseAngleDeg = 65, lateralAngleDeg = 70;
+    let isTransparent = true, isWireframe = false;
+    let scene, camera, renderer, controls, mainGroup;
+
+    const els = {};
+
+    function $(id) { return document.getElementById(id); }
+
+    function cacheEls() {
+      ['canvas3d','currentTypeBadge','btnTrans','btnWire','rngA','rngB','rngC','rngSkew','rngTilt','labelA','labelB','labelC','labelSkew','labelTilt','skewControl','obliqueControl','shapeHint','statA','statB','statC','statD','calcFormulaStep','chkOppFaces','chkAllDiags','chkMeasures','chkMainDiag'].forEach(id => els[id] = $(id));
+    }
+
+    function init3D() {
+      const container = els.canvas3d;
+      const width = Math.max(container.clientWidth, 320);
+      const height = Math.max(container.clientHeight, 500);
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0f172a);
+
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+      camera.position.set(11, 9, 13);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(width, height);
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      container.innerHTML = '';
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.target.set(0, 2, 0);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+      const dir1 = new THREE.DirectionalLight(0xffffff, 0.9); dir1.position.set(10, 18, 14); scene.add(dir1);
+      const dir2 = new THREE.DirectionalLight(0x818cf8, 0.35); dir2.position.set(-10, 5, -10); scene.add(dir2);
+
+      const grid = new THREE.GridHelper(22, 22, 0x334155, 0x1e293b);
+      grid.position.y = -0.02;
+      scene.add(grid);
+
+      mainGroup = new THREE.Group();
+      scene.add(mainGroup);
+
+      buildModel();
+      animate();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (controls) controls.update();
+      if (renderer && scene && camera) renderer.render(scene, camera);
+    }
+
+    function onResize() {
+      if (!renderer || !camera || !els.canvas3d) return;
+      const w = Math.max(els.canvas3d.clientWidth, 320);
+      const h = Math.max(els.canvas3d.clientHeight, 500);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+
+    function clearGroup() {
+      if (!mainGroup) return;
+      while (mainGroup.children.length) {
+        const obj = mainGroup.children.pop();
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose && m.dispose());
+          else obj.material.dispose && obj.material.dispose();
+        }
+      }
+    }
+
+    function getVertices() {
+      const a = paramA, b = paramB, c = paramC;
+      let skewX = 0;
+      let topShiftX = 0;
+
+      if (shapeType === 'direct') {
+        const angle = baseAngleDeg * Math.PI / 180;
+        skewX = b * Math.cos(angle);
+      }
+      if (shapeType === 'general') {
+        const baseAngle = baseAngleDeg * Math.PI / 180;
+        skewX = b * Math.cos(baseAngle);
+        const tilt = lateralAngleDeg * Math.PI / 180;
+        topShiftX = c * Math.cos(tilt);
+      }
+
+      const depth = (shapeType === 'direct' || shapeType === 'general') ? b * Math.sin(baseAngleDeg * Math.PI / 180) : b;
+      const height = shapeType === 'general' ? c * Math.sin(lateralAngleDeg * Math.PI / 180) : c;
+      const x0 = -a / 2 - skewX / 2 - topShiftX / 2;
+      const z0 = -depth / 2;
+
+      return [
+        new THREE.Vector3(x0, 0, z0 + depth),
+        new THREE.Vector3(x0 + a, 0, z0 + depth),
+        new THREE.Vector3(x0 + a + skewX, 0, z0),
+        new THREE.Vector3(x0 + skewX, 0, z0),
+        new THREE.Vector3(x0 + topShiftX, height, z0 + depth),
+        new THREE.Vector3(x0 + a + topShiftX, height, z0 + depth),
+        new THREE.Vector3(x0 + a + skewX + topShiftX, height, z0),
+        new THREE.Vector3(x0 + skewX + topShiftX, height, z0)
+      ];
+    }
+
+    function addLine(p1, p2, color, dashed = false) {
+      const geo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+      const mat = dashed ? new THREE.LineDashedMaterial({ color, dashSize: 0.28, gapSize: 0.18 }) : new THREE.LineBasicMaterial({ color });
+      const line = new THREE.Line(geo, mat);
+      if (dashed) line.computeLineDistances();
+      mainGroup.add(line);
+      return line;
+    }
+
+    function addFace(vs, indices, color, opacity = 0.28) {
+      const pos = [];
+      const q = indices;
+      [[0,1,2],[0,2,3]].forEach(t => t.forEach(i => { const p = vs[q[i]]; pos.push(p.x,p.y,p.z); }));
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      geo.computeVertexNormals();
+      const mat = new THREE.MeshPhongMaterial({ color, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false });
+      mainGroup.add(new THREE.Mesh(geo, mat));
+    }
+
+    function createTextSprite(text, color = '#ffffff', scale = 1.35) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256; canvas.height = 96;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.font = '700 34px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(15,23,42,.8)'; ctx.strokeText(text,128,48);
+      ctx.fillStyle = color; ctx.fillText(text,128,48);
+      const tex = new THREE.CanvasTexture(canvas);
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(scale * 2.1, scale * 0.8, 1);
+      return sprite;
+    }
+
+    function buildModel() {
+      if (!mainGroup) return;
+      clearGroup();
+      const v = getVertices();
+
+      const faces = [[0,1,2,3],[4,7,6,5],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0]];
+      const pos = [];
+      faces.forEach(q => [[0,1,2],[0,2,3]].forEach(t => t.forEach(i => { const p = v[q[i]]; pos.push(p.x,p.y,p.z); })));
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+      geo.computeVertexNormals();
+      const mat = new THREE.MeshPhongMaterial({ color: 0x3b82f6, transparent: isTransparent, opacity: isTransparent ? 0.28 : 0.8, side: THREE.DoubleSide, wireframe: isWireframe, shininess: 35 });
+      mainGroup.add(new THREE.Mesh(geo, mat));
+
+      const edges = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+      edges.forEach(e => addLine(v[e[0]], v[e[1]], 0xbfdbfe));
+
+      const labels = ['A','B','C','D','A₁','B₁','C₁','D₁'];
+      v.forEach((p,i) => {
+        const dot = new THREE.Mesh(new THREE.SphereGeometry(0.10,12,12), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        dot.position.copy(p); mainGroup.add(dot);
+        const s = createTextSprite(labels[i]); s.position.copy(p).add(new THREE.Vector3(0,0.34,0)); mainGroup.add(s);
+      });
+
+      if (els.chkOppFaces.checked) {
+        addFace(v,[0,4,5,1],0x8b5cf6,0.48);
+        addFace(v,[2,6,7,3],0x8b5cf6,0.48);
+      }
+
+      if (els.chkAllDiags.checked) {
+        [[0,6],[1,7],[2,4],[3,5]].forEach((d,i) => addLine(v[d[0]],v[d[1]],i===0?0xfb7185:0xfbbf24,true));
+        const o = new THREE.Vector3().addVectors(v[0],v[6]).multiplyScalar(0.5);
+        const dot = new THREE.Mesh(new THREE.SphereGeometry(0.17,16,16), new THREE.MeshBasicMaterial({ color: 0xf59e0b }));
+        dot.position.copy(o); mainGroup.add(dot);
+        const s = createTextSprite('O','#fbbf24',1.05); s.position.copy(o).add(new THREE.Vector3(0,0.38,0)); mainGroup.add(s);
+      } else if (els.chkMainDiag.checked && (shapeType === 'rect' || shapeType === 'cube')) {
+        addLine(v[0],v[6],0xf43f5e,false);
+        const mid = new THREE.Vector3().addVectors(v[0],v[6]).multiplyScalar(0.5);
+        const s = createTextSprite('d','#fb7185',1.0); s.position.copy(mid).add(new THREE.Vector3(0,0.3,0)); mainGroup.add(s);
+      }
+
+      if (els.chkMeasures.checked && (shapeType === 'rect' || shapeType === 'cube')) {
+        const measures = [[0,1,'a','#a5b4fc'],[0,3,'b','#67e8f9'],[0,4,'c','#6ee7b7']];
+        measures.forEach(([i,j,t,c]) => {
+          const mid = new THREE.Vector3().addVectors(v[i],v[j]).multiplyScalar(0.5);
+          const s = createTextSprite(t,c,0.95); s.position.copy(mid).add(new THREE.Vector3(0,0.26,0)); mainGroup.add(s);
+        });
+      }
+
+      updateCalculations();
+    }
+
+    function updateCalculations() {
+      els.statA.textContent = `${paramA} см`;
+      els.statB.textContent = `${paramB} см`;
+      els.statC.textContent = `${paramC} см`;
+      if (shapeType === 'rect' || shapeType === 'cube') {
+        const d = Math.sqrt(paramA**2 + paramB**2 + paramC**2);
+        els.statD.textContent = `${d.toFixed(2)} см`;
+        els.calcFormulaStep.textContent = `d² = ${paramA}² + ${paramB}² + ${paramC}² = ${(paramA**2 + paramB**2 + paramC**2).toFixed(2)} ⇒ d ≈ ${d.toFixed(2)} см`;
+      } else {
+        els.statD.textContent = '—';
+        els.calcFormulaStep.textContent = 'Оберіть прямокутний паралелепіпед або куб, щоб виконати обчислення.';
+      }
+    }
+
+    function syncControls() {
+      if (shapeType === 'cube') {
+        paramB = paramA; paramC = paramA;
+        els.rngB.value = paramA; els.rngC.value = paramA;
+        els.rngB.disabled = true; els.rngC.disabled = true;
+      } else {
+        els.rngB.disabled = false; els.rngC.disabled = false;
+      }
+      els.labelA.textContent = `${paramA} см`;
+      els.labelB.textContent = `${paramB} см`;
+      els.labelC.textContent = `${paramC} см`;
+      els.labelSkew.textContent = `${baseAngleDeg}°`;
+      els.labelTilt.textContent = `${lateralAngleDeg}°`;
+      els.skewControl.classList.toggle('hidden', !(shapeType === 'direct' || shapeType === 'general'));
+      els.obliqueControl.classList.toggle('hidden', shapeType !== 'general');
+
+      const hints = {
+        general: '<b>Паралелепіпед.</b> Призма, основами якої є паралелограми. У моделі показано загальний випадок із похилими бічними ребрами.',
+        direct: '<b>Прямий паралелепіпед.</b> Бічні ребра перпендикулярні до площини основи, тому всі бічні грані - прямокутники.',
+        rect: '<b>Прямокутний паралелепіпед.</b> Прямий паралелепіпед із прямокутниками в основах. Саме для нього вводять три виміри a, b, c.',
+        cube: '<b>Куб.</b> Прямокутний паралелепіпед, у якого a = b = c. Усі його грані - квадрати.'
+      };
+      const badges = { general:'Паралелепіпед', direct:'Прямий паралелепіпед', rect:'Прямокутний паралелепіпед', cube:'Куб' };
+      els.shapeHint.innerHTML = hints[shapeType];
+      els.currentTypeBadge.textContent = badges[shapeType];
+      document.querySelectorAll('.shape-btn').forEach(btn => {
+        const active = btn.dataset.shape === shapeType;
+        btn.className = `shape-btn px-2.5 py-2 text-xs font-bold rounded-xl border transition ${active ? 'bg-indigo-50 border-indigo-400 text-indigo-900' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'}`;
+      });
+      const validRect = shapeType === 'rect' || shapeType === 'cube';
+      els.chkMeasures.disabled = !validRect;
+      els.chkMainDiag.disabled = !validRect;
+      if (!validRect) { els.chkMeasures.checked = false; els.chkMainDiag.checked = false; }
+      else if (!els.chkMeasures.checked && !els.chkMainDiag.checked) { els.chkMeasures.checked = true; els.chkMainDiag.checked = true; }
+    }
+
+    function setShape(type) {
+      shapeType = type;
+      if (type === 'cube') { paramA = 4; paramB = 4; paramC = 4; els.rngA.value = 4; els.rngB.value = 4; els.rngC.value = 4; }
+      syncControls();
+      buildModel();
+      if (controls) { controls.target.set(0, paramC/2, 0); controls.update(); }
+    }
+
+    function setMode(mode) {
+      const map = { model:'panelModel', properties:'panelProperties', theorem:'panelTheorem', tasks:'panelTasks' };
+      Object.entries(map).forEach(([key,id]) => $(id).hidden = key !== mode);
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        const active = btn.dataset.mode === mode;
+        btn.className = `tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition ${active ? 'bg-white text-indigo-800 shadow-sm' : 'bg-indigo-800 text-indigo-100 hover:bg-indigo-900'}`;
+      });
+      if (mode === 'theorem' && window.MathJax?.typesetPromise) MathJax.typesetPromise();
+    }
+
+    const taskPool = [
+      {
+        q:'Чи можна вважати правильним означення: «Кубом називають правильну чотирикутну призму, висота якої дорівнює стороні основи»?',
+        options:['Так','Ні, куб не є призмою','Ні, висота куба не дорівнює ребру','Лише коли сторона основи більша за висоту'],
+        correct:0,
+        solution:'Так. У такій правильній чотирикутній призмі основа є квадратом, а висота дорівнює стороні основи, отже всі три виміри рівні.'
+      },
+      {
+        q:'Сторони основи прямокутного паралелепіпеда дорівнюють 5 см і 12 см. Знайдіть діагональ основи.',
+        options:['13 см','17 см','√119 см','7 см'],
+        correct:0,
+        solution:'За теоремою Піфагора: d₀ = √(5² + 12²) = √169 = 13 см.'
+      },
+      {
+        q:'Знайдіть діагональ прямокутного паралелепіпеда, виміри якого дорівнюють 2 см, 3 см і 6 см.',
+        options:['7 см','11 см','√38 см','6.5 см'],
+        correct:0,
+        solution:'d² = 2² + 3² + 6² = 4 + 9 + 36 = 49, тому d = 7 см.'
+      },
+      {
+        q:'Скільки діагоналей має паралелепіпед і що відбувається в точці їх перетину?',
+        options:['4; діляться навпіл','2; перпендикулярні','6; діляться у відношенні 2:1','4; завжди взаємно перпендикулярні'],
+        correct:0,
+        solution:'Паралелепіпед має 4 діагоналі. Вони перетинаються в одній точці й діляться цією точкою навпіл.'
+      },
+      {
+        q:'Якими є бічні грані прямого паралелепіпеда?',
+        options:['Прямокутниками','Трикутниками','Обов’язково квадратами','Трапеціями'],
+        correct:0,
+        solution:'У прямого паралелепіпеда бічні ребра перпендикулярні до площини основи, тому всі бічні грані є прямокутниками.'
+      }
+    ];
+    let currentTaskIndex = 0, taskAnswered = false, scoreCorrect = 0, scoreTotal = 0;
+
+    function loadTask(idx) {
+      currentTaskIndex = idx; taskAnswered = false;
+      const t = taskPool[idx];
+      $('taskNumber').textContent = `Завдання ${idx+1} з ${taskPool.length}`;
+      $('taskQuestion').textContent = t.q;
+      const box = $('taskOptions'); box.innerHTML = '';
+      t.options.forEach((opt,i) => {
+        const b = document.createElement('button');
+        b.className = 'w-full text-left p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold transition flex items-center justify-between';
+        b.innerHTML = `<span>${opt}</span><i class="fa-regular fa-circle text-slate-400"></i>`;
+        b.addEventListener('click',() => checkTask(i,b));
+        box.appendChild(b);
+      });
+      $('taskFeedback').className = 'hidden';
+      $('btnNextTask').classList.add('opacity-50','pointer-events-none');
+    }
+
+    function checkTask(i,btn) {
+      if (taskAnswered) return;
+      taskAnswered = true; scoreTotal++;
+      const t = taskPool[currentTaskIndex], fb = $('taskFeedback');
+      fb.classList.remove('hidden');
+      if (i === t.correct) {
+        scoreCorrect++;
+        btn.className = 'w-full text-left p-2.5 rounded-xl border border-emerald-400 bg-emerald-50 text-emerald-900 text-xs font-semibold flex items-center justify-between';
+        btn.querySelector('i').className = 'fa-solid fa-circle-check text-emerald-600';
+        fb.className = 'p-3 rounded-xl text-xs bg-emerald-50 border border-emerald-300 text-emerald-900';
+        fb.innerHTML = `<b>✓ Правильно.</b> ${t.solution}`;
+      } else {
+        btn.className = 'w-full text-left p-2.5 rounded-xl border border-rose-400 bg-rose-50 text-rose-900 text-xs font-semibold flex items-center justify-between';
+        btn.querySelector('i').className = 'fa-solid fa-circle-xmark text-rose-600';
+        fb.className = 'p-3 rounded-xl text-xs bg-rose-50 border border-rose-300 text-rose-900';
+        fb.innerHTML = `<b>✕ Неправильно.</b> Правильна відповідь: <b>${t.options[t.correct]}</b>.<br>${t.solution}`;
+      }
+      $('quizScore').textContent = `${scoreCorrect} / ${scoreTotal}`;
+      $('btnNextTask').classList.remove('opacity-50','pointer-events-none');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      cacheEls();
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+      document.querySelectorAll('.shape-btn').forEach(btn => btn.addEventListener('click', () => setShape(btn.dataset.shape)));
+
+      [els.rngA,els.rngB,els.rngC,els.rngSkew,els.rngTilt].forEach(r => r.addEventListener('input', () => {
+        paramA = parseFloat(els.rngA.value); paramB = parseFloat(els.rngB.value); paramC = parseFloat(els.rngC.value);
+        baseAngleDeg = parseFloat(els.rngSkew.value); lateralAngleDeg = parseFloat(els.rngTilt.value);
+        syncControls(); buildModel();
+      }));
+      [els.chkOppFaces,els.chkAllDiags,els.chkMeasures,els.chkMainDiag].forEach(c => c.addEventListener('change', buildModel));
+      $('btnReset').addEventListener('click', () => { camera.position.set(11,9,13); controls.target.set(0,paramC/2,0); controls.update(); });
+      els.btnTrans.addEventListener('click', () => { isTransparent = !isTransparent; els.btnTrans.classList.toggle('text-amber-400',!isTransparent); buildModel(); });
+      els.btnWire.addEventListener('click', () => { isWireframe = !isWireframe; els.btnWire.classList.toggle('text-indigo-400',isWireframe); buildModel(); });
+      $('btnNextTask').addEventListener('click', () => loadTask((currentTaskIndex+1)%taskPool.length));
+      window.addEventListener('resize', onResize);
+
+      syncControls();
+      loadTask(0);
+      setMode('model');
+      init3D();
+    });
+  </script>
+</body>
+</html>
