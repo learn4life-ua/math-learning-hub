@@ -39,6 +39,15 @@ function enhanceMethodicalUI() {
   C.baseState = $('baseState');
   C.regState = $('regState');
 
+  const aControl = C.ra?.parentElement;
+  if (aControl && !$('arbitraryBaseNote')) {
+    const note = document.createElement('div');
+    note.id = 'arbitraryBaseNote';
+    note.className = 'p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed';
+    note.innerHTML = '<b>Довільна основа:</b> її сторони можуть мати різні довжини, тому одну величину <i>a</i> для всіх сторін не задаємо.';
+    aControl.insertAdjacentElement('afterend', note);
+  }
+
   const props = $('panelProperties')?.querySelector('.text-xs.space-y-2');
   if (props && !$('elementCountCard')) {
     const counts = document.createElement('div');
@@ -422,8 +431,12 @@ function updateUI() {
   $('heightText').textContent = r ? 'Висота MO' : 'Висота MH';
   $('heightTextM').textContent = r ? 'Висота MO' : 'Висота MH';
 
-  const aTitle = C.ra.parentElement?.querySelector('b');
-  if (aTitle) aTitle.textContent = st === 0 ? 'Масштаб основи' : 'Сторона основи a';
+  const aControl = C.ra?.parentElement;
+  const aTitle = aControl?.querySelector('b');
+  const arbitraryNote = $('arbitraryBaseNote');
+  if (aControl) aControl.hidden = st === 0;
+  if (arbitraryNote) arbitraryNote.hidden = st !== 0;
+  if (aTitle) aTitle.textContent = 'Сторона основи a';
 
   C.formulaNotice.innerHTML = st === 0
     ? '<b>Довільна піраміда:</b> Sбіч знаходимо як суму площ усіх бічних граней. Формула ½Pосн·l тут не застосовується.'
