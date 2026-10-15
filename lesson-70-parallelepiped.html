@@ -55,7 +55,7 @@ body>main>section>div:first-child{min-height:0!important;height:100%;flex:1}
 #rectStats{display:none}
 body>main>aside{display:none;position:fixed;inset:auto 8px 8px;max-height:75dvh;z-index:55;background:white;border-radius:20px;overflow:auto;box-shadow:0 -8px 40px #0f172a55;padding:46px 0 0}
 body>main>aside.mobile-open{display:flex}
-#mobilePanelClose{display:block;position:sticky;top:0;align-self:flex-end;margin:-40px 12px 0;min-width:44px;min-height:44px;background:#e2e8f0;border-radius:12px;font-size:20px;z-index:2}
+#mobilePanelClose{display:block;position:absolute;top:8px;right:8px;margin:0;min-width:44px;min-height:44px;background:#e2e8f0;border-radius:12px;font-size:20px;z-index:10}
 #mobilePanelBackdrop.mobile-open{display:block;position:fixed;inset:0;background:#0f172a55;z-index:50}
 .tab-btn,#openInstructions{min-height:42px;padding:8px 10px;font-size:12px}
 #btnReset,#btnTrans,#btnWire{min-height:44px;min-width:44px;font-size:14px}
@@ -78,16 +78,16 @@ input[type=checkbox]{width:18px;height:18px}
         </div>
       </div>
       <nav class="flex flex-wrap items-center gap-2" aria-label="Розділи інтерактиву"><button id="openInstructions" class="px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100">Інструкція</button>
-        <button id="btnTabModel" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-800 shadow-sm flex items-center gap-1.5" data-mode="model">
+        <button id="btnTabModel" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-white text-indigo-800 shadow-sm flex items-center gap-1.5" data-mode="model" aria-expanded="false">
           <i class="fa-solid fa-shapes"></i> Налаштування
         </button>
-        <button id="btnTabProps" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="properties">
+        <button id="btnTabProps" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="properties" aria-expanded="false">
           <i class="fa-solid fa-list-check"></i> Властивості
         </button>
-        <button id="btnTabTheorem" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="theorem">
+        <button id="btnTabTheorem" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="theorem" aria-expanded="false">
           <i class="fa-solid fa-square-root-variable"></i> Теорема про діагональ
         </button>
-        <button id="btnTabTasks" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="tasks">
+        <button id="btnTabTasks" class="tab-btn px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold bg-indigo-800 text-indigo-100 hover:bg-indigo-900 flex items-center gap-1.5" data-mode="tasks" aria-expanded="false">
           <i class="fa-solid fa-graduation-cap"></i> Тренажер
         </button>
       </nav>
@@ -657,12 +657,21 @@ instructionsOverlay.addEventListener('click',()=>toggleInstructions(false));
 document.addEventListener('keydown',e=>{if(!instructionsDrawer.hidden){if(e.key==='Escape')toggleInstructions(false);if(e.key==='Tab'){e.preventDefault();document.getElementById('closeInstructions').focus();}}});
 </script><div id="mobilePanelBackdrop"></div><script>
 const lessonPanel=document.getElementById('mobileLessonPanel'),panelBackdrop=document.getElementById('mobilePanelBackdrop');
-function closeMobilePanel(){lessonPanel.classList.remove('mobile-open');panelBackdrop.classList.remove('mobile-open');onResize();}
-document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{if(window.matchMedia('(max-width:1023px)').matches){lessonPanel.classList.add('mobile-open');panelBackdrop.classList.add('mobile-open');}}));
+let mobileOpenMode=null;
+function syncMobileExpanded(){document.querySelectorAll('.tab-btn').forEach(btn=>btn.setAttribute('aria-expanded',String(lessonPanel.classList.contains('mobile-open')&&mobileOpenMode===btn.dataset.mode)));}
+function fitModelViewport(){document.documentElement.style.setProperty('--lesson-header-height',document.querySelector('body>header').getBoundingClientRect().height+'px');onResize();}
+function closeMobilePanel(){lessonPanel.classList.remove('mobile-open');panelBackdrop.classList.remove('mobile-open');mobileOpenMode=null;syncMobileExpanded();requestAnimationFrame(fitModelViewport);}
+function openMobilePanel(mode){mobileOpenMode=mode;lessonPanel.classList.add('mobile-open');panelBackdrop.classList.add('mobile-open');syncMobileExpanded();requestAnimationFrame(fitModelViewport);}
+document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  if(!window.matchMedia('(max-width:1023px)').matches)return;
+  const mode=btn.dataset.mode;
+  if(lessonPanel.classList.contains('mobile-open')&&mobileOpenMode===mode){closeMobilePanel();return;}
+  openMobilePanel(mode);
+}));
 document.getElementById('mobilePanelClose').addEventListener('click',closeMobilePanel);
 panelBackdrop.addEventListener('click',closeMobilePanel);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMobilePanel();});
-function fitModelViewport(){document.documentElement.style.setProperty('--lesson-header-height',document.querySelector('body>header').getBoundingClientRect().height+'px');onResize();}
-window.addEventListener('resize',fitModelViewport);window.addEventListener('load',fitModelViewport);
+window.addEventListener('resize',()=>{if(!window.matchMedia('(max-width:1023px)').matches)closeMobilePanel();fitModelViewport();});
+window.addEventListener('load',fitModelViewport);
 </script></body>
 </html>
