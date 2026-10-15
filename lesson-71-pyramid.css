@@ -31,17 +31,18 @@ body:has(#modeChip.free) #panelModel .space-y-3.text-xs.border-t.pt-3::before{co
  body>header>div>div:first-child>div:first-child{width:34px!important;height:34px!important;border-radius:10px!important;flex:0 0 auto}
  body>header h1{font-size:14px!important;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 70px)}
  body>header p{display:none!important}
- body>header nav{display:flex!important;flex-wrap:nowrap!important;gap:6px!important;margin-top:7px;overflow-x:auto!important;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:1px}
- body>header nav::-webkit-scrollbar{display:none}
- body>header nav button{flex:0 0 auto!important;min-height:40px!important;padding:7px 10px!important;font-size:11px!important}
 
- body>main{height:calc(100dvh - var(--hh,102px));display:block;padding:6px}
+ /* На телефоні всі кнопки розділів завжди видно. Без прихованого горизонтального скролу. */
+ body>header nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px!important;margin-top:7px;overflow:visible!important;padding:0!important}
+ body>header nav button{width:100%!important;min-width:0!important;min-height:38px!important;padding:6px 5px!important;font-size:10.5px!important;line-height:1.15;white-space:normal}
+
+ body>main{height:calc(100dvh - var(--hh,126px));display:block;padding:6px}
  body>main>section{height:100%}
  body>main>section>div:first-child{height:100%;min-height:0!important;border-radius:16px}
  #canvas3d{height:100%;min-height:0;touch-action:none}
  #stats,#sceneOptionsDesktop{display:none!important}
 
- #mobilePanel{display:none!important;position:fixed;left:6px;right:6px;bottom:max(6px,env(safe-area-inset-bottom));max-height:min(82dvh,calc(100dvh - 76px));z-index:70;background:#fff;border-radius:20px;overflow:auto;overscroll-behavior:contain;box-shadow:0 -8px 40px #0f172a55;padding:50px 0 max(8px,env(safe-area-inset-bottom))}
+ #mobilePanel{display:none!important;position:fixed;left:6px;right:6px;bottom:max(6px,env(safe-area-inset-bottom));max-height:min(82dvh,calc(100dvh - 76px));z-index:70;background:#fff;border-radius:20px;overflow:auto;overscroll-behavior:contain;box-shadow:0 -8px 40px #0f172a55;padding:50px 0 max(8px,env(safe-area-inset-bottom));scroll-behavior:smooth}
  #mobilePanel.open{display:flex!important}
  #mobileClose{display:flex;position:absolute;top:7px;right:7px;width:42px;height:42px;align-items:center;justify-content:center;background:#e2e8f0;border-radius:12px;font-size:19px;z-index:75}
  #mobileBackdrop.open{display:block;position:fixed;inset:0;background:#0f172a55;z-index:50}
@@ -59,6 +60,19 @@ body:has(#modeChip.free) #panelModel .space-y-3.text-xs.border-t.pt-3::before{co
  .states .arrow{transform:none;text-align:center;font-size:10px}
  .state{font-size:9px;padding:7px 5px;border-radius:10px;min-width:0}
 
+ /* Кнопки вибору форми основи не ховаємо й робимо зручними для пальця. */
+ #shapeBtns{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+ #shapeBtns button{min-height:42px!important;font-size:11px!important;padding:8px 5px!important}
+
+ /* Базові регулятори показуємо вище розширеного керування вершиною. */
+ #panelModel .mobile-basic-controls-71{display:flex!important;flex-direction:column!important;gap:12px!important}
+ #heightControl71{order:1}
+ #baseSideControl71{order:2}
+ #arbitraryBaseNote{order:3}
+ #vertexPositionControl{order:4}
+ #heightControl71,#baseSideControl71{display:block}
+ #heightControl71 input[type=range],#baseSideControl71 input[type=range]{width:100%;min-height:40px}
+
  #vertexPositionControl{padding:11px!important}
  #vertexPositionControl .grid{grid-template-columns:1fr 1fr!important}
  #vertexPositionControl .grid button{min-height:44px;padding:8px 6px;font-size:11px}
@@ -75,6 +89,7 @@ body:has(#modeChip.free) #panelModel .space-y-3.text-xs.border-t.pt-3::before{co
  .state{font-size:8.5px;padding:6px 4px}
  .states{gap:3px}
  #mobilePanel{left:4px;right:4px}
+ body>header nav button{font-size:10px!important;padding:6px 3px!important}
 }
 
 @media(min-width:1024px){#mobileSceneOptions{display:none}}
