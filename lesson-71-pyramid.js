@@ -3,38 +3,118 @@ const $ = id => document.getElementById(id);
 let n = 4;
 let a = 6;
 let h = 4;
-let reg = 0;
+let baseReg = 0;
+let apexReg = 0;
 let anim = false;
 let transparent = true;
 let wireframe = false;
 let mode = 'model';
 let scene, camera, renderer, controls, group;
+let lastStage = -1;
 const C = {};
 
 function cache() {
-  ['canvas3d','badge','modeChip','status','freeState','regState','makeRegular','hint','ra','rh','la','lh','statL','statP','statLat','statTotal','height','apothem','radius','face','base','formulaNotice','calc'].forEach(id => C[id] = $(id));
+  ['canvas3d','badge','modeChip','status','makeRegular','hint','ra','rh','la','lh','statL','statP','statLat','statTotal','height','apothem','radius','face','base','formulaNotice','calc'].forEach(id => C[id] = $(id));
 }
 
-function regular() {
-  return reg > .999;
+function baseIsRegular() { return baseReg > .999; }
+function regular() { return baseIsRegular() && apexReg > .999; }
+function currentStage() {
+  if (!baseIsRegular()) return 0;
+  if (!regular()) return 1;
+  return 2;
+}
+
+function enhanceMethodicalUI() {
+  const states = document.querySelector('.states');
+  if (states) {
+    states.innerHTML = `
+      <div id="freeState" class="state free">Довільна піраміда<br><span class="font-medium">основа довільна</span></div>
+      <div class="arrow text-teal-700"><i class="fa-solid fa-arrow-right"></i></div>
+      <div id="baseState" class="state">Правильна основа<br><span class="font-medium">H ≠ O</span></div>
+      <div class="arrow text-teal-700"><i class="fa-solid fa-arrow-right"></i></div>
+      <div id="regState" class="state">Правильна піраміда<br><span class="font-medium">H = O</span></div>`;
+  }
+  C.freeState = $('freeState');
+  C.baseState = $('baseState');
+  C.regState = $('regState');
+
+  const props = $('panelProperties')?.querySelector('.text-xs.space-y-2');
+  if (props && !$('elementCountCard')) {
+    const counts = document.createElement('div');
+    counts.id = 'elementCountCard';
+    counts.className = 'p-3 bg-indigo-50 rounded-xl border border-indigo-200';
+    props.appendChild(counts);
+
+    const regProps = document.createElement('div');
+    regProps.className = 'p-3 bg-emerald-50 rounded-xl border border-emerald-200';
+    regProps.innerHTML = `<b class="block mb-1">У правильній піраміді</b>
+      <ul class="list-disc pl-4 space-y-1">
+        <li>усі бічні ребра рівні;</li>
+        <li>усі бічні грані - рівні рівнобедрені трикутники;</li>
+        <li>усі апофеми рівні.</li>
+      </ul>`;
+    props.appendChild(regProps);
+
+    const compare = document.createElement('div');
+    compare.className = 'p-3 bg-rose-50 rounded-xl border border-rose-200';
+    compare.innerHTML = `<b class="block mb-1">Не плутай</b>
+      Висота піраміди перпендикулярна <b>площині основи</b>. Апофема правильної піраміди - це висота <b>бічної грані</b>, тому вона перпендикулярна відповідній стороні основи.`;
+    props.appendChild(compare);
+  }
+
+  const formulaPanel = $('panelFormula');
+  if (formulaPanel) {
+    const blocks = Array.from(formulaPanel.children);
+    if (blocks[2] && !blocks[2].id) blocks[2].id = 'formulaRegularLateral';
+    if (blocks[3] && !blocks[3].id) blocks[3].id = 'formulaTotal';
+    if (blocks[4] && !blocks[4].id) blocks[4].id = 'formulaMON';
+  }
+
+  const drawer = $('drawer');
+  if (drawer) {
+    const ol = drawer.querySelector('ol');
+    if (ol) ol.innerHTML = `
+      <li>Почни з <b>довільної піраміди</b>: її основа не є правильним многокутником. Знайди вершину M і основу висоти H.</li>
+      <li>Натисни <b>«Зробити основу правильною»</b>. Основа перетвориться на правильний n-кутник, але H ще не збігатиметься з O.</li>
+      <li>Натисни <b>«Зробити правильною»</b>. Простеж, як H переміщується до центра O.</li>
+      <li>Перевір дві умови: основа - правильний многокутник і H = O.</li>
+      <li>Лише після цього ввімкни апофему MN та ON і досліди прямокутний трикутник MON.</li>
+      <li>Порівняй: для довільної піраміди Sбіч - сума площ бічних граней; формула ½P·l застосовується до правильної піраміди.</li>
+      <li>Виконай тренажер і переглянь підсумок.</li>`;
+  }
+}
+
+function irregularTemplate(i, R) {
+  const radial = [1.08, .82, 1.15, .90, 1.06, .86, 1.12, .94];
+  const angleShift = [0, .055, -.045, .065, -.04, .05, -.035, .025];
+  const t = Math.PI / 2 + 2 * Math.PI * i / n + angleShift[i];
+  const rr = R * radial[i];
+  return new THREE.Vector3(rr * Math.cos(t), 0, rr * Math.sin(t));
 }
 
 function geom() {
   const R = a / (2 * Math.sin(Math.PI / n));
-  const r = a / (2 * Math.tan(Math.PI / n));
+  const regularBase = [];
   const base = [];
+
   for (let i = 0; i < n; i++) {
     const t = Math.PI / 2 + 2 * Math.PI * i / n;
-    base.push(new THREE.Vector3(R * Math.cos(t), 0, R * Math.sin(t)));
+    const regPoint = new THREE.Vector3(R * Math.cos(t), 0, R * Math.sin(t));
+    regularBase.push(regPoint);
+    const irr = irregularTemplate(i, R);
+    base.push(irr.clone().lerp(regPoint, baseReg));
   }
-  const k = 1 - reg;
-  const ox = R * .58 * k;
-  const oz = -R * .28 * k;
-  const apex = new THREE.Vector3(ox, h, oz);
+
   const O = new THREE.Vector3(0, 0, 0);
-  const H = new THREE.Vector3(ox, 0, oz);
+  const offset = new THREE.Vector3(R * .46, 0, -R * .22).multiplyScalar(1 - apexReg);
+  const H = offset.clone();
+  const apex = new THREE.Vector3(H.x, h, H.z);
   const N = new THREE.Vector3().addVectors(base[0], base[1]).multiplyScalar(.5);
-  return {R, r, base, apex, O, H, N, l: Math.sqrt(h * h + r * r)};
+  const r = O.distanceTo(N);
+  const l = Math.sqrt(h * h + r * r);
+
+  return {R, base, regularBase, apex, O, H, N, r, l};
 }
 
 function init3d() {
@@ -48,6 +128,7 @@ function init3d() {
   renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.setSize(w, hh);
+  c.innerHTML = '';
   c.appendChild(renderer.domElement);
   controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -84,7 +165,10 @@ function clear() {
   while (group?.children.length) {
     const o = group.children.pop();
     o.geometry?.dispose();
-    o.material?.dispose?.();
+    if (o.material) {
+      if (Array.isArray(o.material)) o.material.forEach(m => m.dispose?.());
+      else o.material.dispose?.();
+    }
   }
 }
 
@@ -118,23 +202,21 @@ function point(P, color, size = .11) {
 
 function sprite(text, color = '#fff', s = 1) {
   const c = document.createElement('canvas');
-  c.width = 320;
-  c.height = 72;
+  c.width = 560;
+  c.height = 80;
   const x = c.getContext('2d');
   x.font = '700 25px Arial';
   x.textAlign = 'center';
   x.textBaseline = 'middle';
   x.lineWidth = 5;
   x.strokeStyle = '#0f172acc';
-  x.strokeText(text, 160, 36);
+  x.strokeText(text, 280, 40);
   x.fillStyle = color;
-  x.fillText(text, 160, 36);
+  x.fillText(text, 280, 40);
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: new THREE.CanvasTexture(c),
-    transparent: true,
-    depthTest: false
+    map: new THREE.CanvasTexture(c), transparent: true, depthTest: false
   }));
-  sp.scale.set(3.1 * s, .7 * s, 1);
+  sp.scale.set(5.2 * s, .74 * s, 1);
   return sp;
 }
 
@@ -147,11 +229,7 @@ function faceMesh(p, color, opacity) {
   g.setAttribute('position', new THREE.Float32BufferAttribute(q, 3));
   g.computeVertexNormals();
   group.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({
-    color,
-    transparent: true,
-    opacity,
-    side: THREE.DoubleSide,
-    depthWrite: false
+    color, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false
   })));
 }
 
@@ -159,6 +237,21 @@ function triArea(A, B, Cc) {
   const u = new THREE.Vector3().subVectors(B, A);
   const v = new THREE.Vector3().subVectors(Cc, A);
   return .5 * new THREE.Vector3().crossVectors(u, v).length();
+}
+
+function polygonPerimeter(points) {
+  let p = 0;
+  for (let i = 0; i < points.length; i++) p += points[i].distanceTo(points[(i + 1) % points.length]);
+  return p;
+}
+
+function polygonAreaXZ(points) {
+  let s = 0;
+  for (let i = 0; i < points.length; i++) {
+    const A = points[i], B = points[(i + 1) % points.length];
+    s += A.x * B.z - B.x * A.z;
+  }
+  return Math.abs(s) / 2;
 }
 
 function rightAngleMark(origin, dirA, dirB, color = 0xffffff, size = .34) {
@@ -204,10 +297,27 @@ function build() {
 
   if (C.height.checked) {
     line(G.apex, G.H, 0xfb7185, true);
-    const baseDir = regular()
-      ? new THREE.Vector3().subVectors(G.N, G.O)
-      : new THREE.Vector3().subVectors(G.O, G.H);
-    rightAngleMark(G.H, new THREE.Vector3(0, 1, 0), baseDir, 0xfda4af, .32);
+    const inPlane = new THREE.Vector3().subVectors(G.base[0], G.H);
+    rightAngleMark(G.H, new THREE.Vector3(0, 1, 0), inPlane, 0xfda4af, .32);
+    const midH = new THREE.Vector3().addVectors(G.apex, G.H).multiplyScalar(.5);
+    const hLabel = sprite(regular() ? 'MO ⟂ площині основи' : 'MH ⟂ площині основи', '#fda4af', .62);
+    hLabel.position.copy(midH).add(new THREE.Vector3(.8, 0, .2));
+    group.add(hLabel);
+  }
+
+  point(G.H, regular() ? 0x34d399 : 0xf59e0b, .12);
+  if (!regular()) {
+    const hs = sprite('H - основа висоти', '#fbbf24', .62);
+    hs.position.copy(G.H).add(new THREE.Vector3(0, .26, 0));
+    group.add(hs);
+  }
+
+  if (baseIsRegular()) {
+    point(G.O, 0x34d399, .12);
+    if (!regular()) line(G.H, G.O, 0xf59e0b, true);
+    const os = sprite(regular() ? 'O = H - центр основи' : 'O - центр правильної основи', '#6ee7b7', .62);
+    os.position.copy(G.O).add(new THREE.Vector3(0, .25, 0));
+    group.add(os);
   }
 
   if (regular() && C.apothem.checked) {
@@ -215,32 +325,21 @@ function build() {
     const sideDir = new THREE.Vector3().subVectors(G.base[1], G.N);
     const apothemDir = new THREE.Vector3().subVectors(G.apex, G.N);
     rightAngleMark(G.N, sideDir, apothemDir, 0x67e8f9, .3);
+    const midA = new THREE.Vector3().addVectors(G.apex, G.N).multiplyScalar(.5);
+    const aLabel = sprite('MN ⟂ стороні основи', '#67e8f9', .58);
+    aLabel.position.copy(midA).add(new THREE.Vector3(-.8, 0, .2));
+    group.add(aLabel);
   }
 
-  if (regular() && C.radius.checked) {
-    line(G.O, G.N, 0x34d399, true);
-  }
+  if (regular() && C.radius.checked) line(G.O, G.N, 0x34d399, true);
 
-  point(G.O, 0x34d399, .12);
-  const os = sprite(regular() ? 'O = H - центр основи' : 'O - центр правильної основи', '#6ee7b7', .78);
-  os.position.copy(G.O).add(new THREE.Vector3(0, .24, 0));
-  group.add(os);
-
-  if (!regular()) {
-    line(G.H, G.O, 0xf59e0b, true);
-    point(G.H, 0xf59e0b, .12);
-    const hs = sprite('H - основа висоти', '#fbbf24', .75);
-    hs.position.copy(G.H).add(new THREE.Vector3(0, .25, 0));
-    group.add(hs);
-  }
-
-  const ms = sprite('M - вершина', '#ffffff', .82);
+  const ms = sprite('M - вершина', '#ffffff', .66);
   ms.position.copy(G.apex).add(new THREE.Vector3(0, .38, 0));
   group.add(ms);
 
   if (regular()) {
     point(G.N, 0x22d3ee, .1);
-    const ns = sprite('N - середина сторони', '#67e8f9', .72);
+    const ns = sprite('N - середина сторони', '#67e8f9', .58);
     ns.position.copy(G.N).add(new THREE.Vector3(0, .22, 0));
     group.add(ns);
   }
@@ -249,99 +348,146 @@ function build() {
 }
 
 function calc(G = geom()) {
-  const P = n * a;
-  const Sbase = .5 * P * G.r;
+  const P = polygonPerimeter(G.base);
+  const Sbase = polygonAreaXZ(G.base);
   let Sb = 0;
-  for (let i = 0; i < n; i++) {
-    Sb += triArea(G.base[i], G.base[(i + 1) % n], G.apex);
-  }
+  for (let i = 0; i < n; i++) Sb += triArea(G.base[i], G.base[(i + 1) % n], G.apex);
   const St = Sb + Sbase;
+  const st = currentStage();
 
   C.la.textContent = `${a} см`;
   C.lh.textContent = `${h} см`;
   C.statL.textContent = regular() ? `${G.l.toFixed(2).replace('.', ',')} см` : '—';
-  C.statP.textContent = `${P} см`;
+  C.statP.textContent = `${P.toFixed(baseIsRegular() ? 0 : 2).replace('.', ',')} см`;
   C.statLat.textContent = `${Sb.toFixed(2).replace('.', ',')} см²`;
   C.statTotal.textContent = `${St.toFixed(2).replace('.', ',')} см²`;
 
-  C.calc.innerHTML = regular()
-    ? `P=${P}; ON≈${G.r.toFixed(2).replace('.', ',')}; l≈${G.l.toFixed(2).replace('.', ',')}; S<sub>біч</sub>≈${Sb.toFixed(2).replace('.', ',')} см²; S<sub>повн</sub>≈${St.toFixed(2).replace('.', ',')} см²`
-    : `Основа є правильним ${n}-кутником, але H ≠ O. S<sub>біч</sub>=S₁+S₂+…+Sₙ≈${Sb.toFixed(2).replace('.', ',')} см². Формулу ½P·l не застосовуємо.`;
+  if (regular()) {
+    C.calc.innerHTML = `P=${P.toFixed(0)}; ON≈${G.r.toFixed(2).replace('.', ',')}; l≈${G.l.toFixed(2).replace('.', ',')}; S<sub>біч</sub>=½P·l≈${Sb.toFixed(2).replace('.', ',')} см²; S<sub>повн</sub>≈${St.toFixed(2).replace('.', ',')} см²`;
+  } else {
+    C.calc.innerHTML = `S<sub>біч</sub>=S₁+S₂+…+Sₙ≈${Sb.toFixed(2).replace('.', ',')} см²; S<sub>повн</sub>=S<sub>біч</sub>+S<sub>осн</sub>≈${St.toFixed(2).replace('.', ',')} см². Формулу ½P·l ще не застосовуємо.`;
+  }
 
   const name = {3:'трикутна',4:'чотирикутна',5:'п’ятикутна',6:'шестикутна',7:'семикутна',8:'восьмикутна'}[n];
-  C.badge.textContent = regular()
-    ? `Правильна ${name} піраміда`
-    : `${name[0].toUpperCase() + name.slice(1)} піраміда з правильною основою`;
+  C.badge.textContent = st === 0
+    ? `Довільна ${name} піраміда`
+    : st === 1
+      ? `${name[0].toUpperCase() + name.slice(1)} піраміда з правильною основою`
+      : `Правильна ${name} піраміда`;
 
   if (!anim) updateUI();
 }
 
 function updateUI() {
+  const st = currentStage();
   const r = regular();
-  C.modeChip.textContent = r ? 'основа правильна, H = O' : 'основа правильна, H ≠ O';
-  C.modeChip.className = `chip ${r ? 'reg' : 'free'}`;
 
-  C.status.textContent = r
-    ? 'Виконано обидві умови правильної піраміди'
-    : 'Основа правильна, але вершина M зміщена: H ≠ O';
+  C.modeChip.textContent = st === 0 ? 'основа довільна' : st === 1 ? 'основа правильна, H ≠ O' : 'основа правильна, H = O';
+  C.modeChip.className = `chip ${st === 0 ? 'free' : st === 1 ? 'mid' : 'reg'}`;
 
-  C.freeState.className = `state ${r ? '' : 'free'}`;
-  C.regState.className = `state ${r ? 'reg' : ''}`;
-  C.freeState.innerHTML = 'Піраміда<br><span class="font-medium">основа правильна, H ≠ O</span>';
-  C.regState.innerHTML = 'Правильна<br><span class="font-medium">основа правильна, H = O</span>';
+  C.status.textContent = st === 0
+    ? 'Основа - довільний многокутник'
+    : st === 1
+      ? 'Основа правильна, але H не збігається з O'
+      : 'Виконано обидві умови правильної піраміди';
 
-  C.makeRegular.className = `transform-btn ${r ? 'back' : ''}`;
-  C.makeRegular.querySelector('span').textContent = r ? 'Повернути зміщену вершину' : 'Зробити правильною';
-  C.makeRegular.querySelector('i').className = r ? 'fa-solid fa-arrow-rotate-left mr-1' : 'fa-solid fa-wand-magic-sparkles mr-1';
+  C.freeState.className = `state ${st === 0 ? 'free' : ''}`;
+  C.baseState.className = `state ${st === 1 ? 'mid' : ''}`;
+  C.regState.className = `state ${st === 2 ? 'reg' : ''}`;
 
-  C.hint.innerHTML = r
-    ? '<b>Чому вона правильна?</b> Основа - правильний многокутник, і основа висоти H збігається з центром O. Виконано обидві умови.'
-    : '<b>Важливо:</b> у цій моделі основа вже є правильним многокутником. Але цього недостатньо. Щоб піраміда була правильною, потрібно ще H = O. Кнопка змінює лише положення вершини.';
+  C.makeRegular.className = `transform-btn ${st === 2 ? 'back' : ''}`;
+  C.makeRegular.querySelector('i').className = st === 2 ? 'fa-solid fa-arrow-rotate-left mr-1' : 'fa-solid fa-wand-magic-sparkles mr-1';
+  C.makeRegular.querySelector('span').textContent = st === 0
+    ? 'Зробити основу правильною'
+    : st === 1
+      ? 'Зробити правильною'
+      : 'Повернути довільну';
+
+  C.hint.innerHTML = st === 0
+    ? '<b>Крок 1.</b> Зараз основа довільна. Спочатку перетвори її на правильний n-кутник.'
+    : st === 1
+      ? '<b>Крок 2.</b> Основа вже правильна, але цього недостатньо: потрібно, щоб основа висоти H збіглася з центром O.'
+      : '<b>Правильна піраміда:</b> основа - правильний многокутник і H = O. Виконано обидві умови.';
 
   C.apothem.disabled = !r;
   C.radius.disabled = !r;
+  if (st !== 2) {
+    C.apothem.checked = false;
+    C.radius.checked = false;
+  } else if (lastStage !== 2) {
+    C.apothem.checked = true;
+    C.radius.checked = true;
+  }
+
   $('heightText').textContent = r ? 'Висота MO' : 'Висота MH';
   $('heightTextM').textContent = r ? 'Висота MO' : 'Висота MH';
 
-  C.formulaNotice.innerHTML = r
-    ? '<b>Правильна піраміда:</b> основа - правильний многокутник і H = O. Тому можна використовувати апофему та формулу Sбіч = ½Pосн·l.'
-    : '<b>Піраміда з правильною основою, але не правильна:</b> H ≠ O. Правильність визначається не тільки наявністю висоти. Потрібні дві умови: правильна основа та збіг H з O.';
+  const aTitle = C.ra.parentElement?.querySelector('b');
+  if (aTitle) aTitle.textContent = st === 0 ? 'Масштаб основи' : 'Сторона основи a';
+
+  C.formulaNotice.innerHTML = st === 0
+    ? '<b>Довільна піраміда:</b> Sбіч знаходимо як суму площ усіх бічних граней. Формула ½Pосн·l тут не застосовується.'
+    : st === 1
+      ? '<b>Основа вже правильна, але піраміда ще не правильна:</b> H ≠ O. Апофема MN і трикутник MON у цьому режимі не використовуються.'
+      : '<b>Правильна піраміда:</b> основа - правильний многокутник і H = O. Тепер можна використовувати апофему та формулу Sбіч = ½Pосн·l.';
+
+  const regularLateral = $('formulaRegularLateral');
+  const mon = $('formulaMON');
+  if (regularLateral) regularLateral.hidden = !r;
+  if (mon) mon.hidden = !r;
+
+  const counts = $('elementCountCard');
+  if (counts) counts.innerHTML = `<b class="block mb-1">${n}-кутна піраміда</b>Має <b>${n + 1}</b> вершин, <b>${n + 1}</b> граней і <b>${2 * n}</b> ребер.`;
 
   syncMirrors();
+  lastStage = st;
 }
 
-function animateReg(target) {
+function animateValue(which, target, duration = 850, done) {
   if (anim) return;
-  const start = reg;
+  const start = which === 'base' ? baseReg : apexReg;
   const t0 = performance.now();
   anim = true;
   C.makeRegular.disabled = true;
 
-  function f(now) {
-    const x = Math.min(1, (now - t0) / 900);
+  function frame(now) {
+    const x = Math.min(1, (now - t0) / duration);
     const e = x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
-    reg = start + (target - start) * e;
+    const value = start + (target - start) * e;
+    if (which === 'base') baseReg = value;
+    else apexReg = value;
     build();
-    if (x < 1) requestAnimationFrame(f);
+    if (x < 1) requestAnimationFrame(frame);
     else {
-      reg = target;
+      if (which === 'base') baseReg = target;
+      else apexReg = target;
       anim = false;
       C.makeRegular.disabled = false;
       updateUI();
       build();
+      done?.();
     }
   }
-  requestAnimationFrame(f);
+  requestAnimationFrame(frame);
 }
 
-function toggleReg() {
-  const target = regular() ? 0 : 1;
+function resetToArbitrary() {
+  if (anim) return;
+  animateValue('apex', 0, 650, () => animateValue('base', 0, 750));
+}
+
+function stageAction() {
+  const st = currentStage();
+  const run = () => {
+    if (st === 0) animateValue('base', 1);
+    else if (st === 1) animateValue('apex', 1);
+    else resetToArbitrary();
+  };
+
   if (matchMedia('(max-width:1023px)').matches && mobilePanel.classList.contains('open')) {
     closePanel();
-    setTimeout(() => animateReg(target), 180);
-  } else {
-    animateReg(target);
-  }
+    setTimeout(run, 180);
+  } else run();
 }
 
 function shapeButtons() {
@@ -351,11 +497,7 @@ function shapeButtons() {
     const x = document.createElement('button');
     x.textContent = `${k}-кутна`;
     x.className = `px-2 py-2 text-xs font-bold rounded-xl border ${k === n ? 'bg-teal-50 border-teal-500 text-teal-900' : 'bg-slate-50 border-slate-200'}`;
-    x.onclick = () => {
-      n = k;
-      shapeButtons();
-      build();
-    };
+    x.onclick = () => { n = k; shapeButtons(); build(); };
     b.appendChild(x);
   }
 }
@@ -367,7 +509,8 @@ function setMode(m) {
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.className = `tab-btn px-3 py-2 rounded-lg text-xs font-semibold ${b.dataset.mode === m ? 'bg-white text-teal-900' : 'bg-teal-900 text-white'}`;
   });
-  if (m === 'formula' && MathJax?.typesetPromise) MathJax.typesetPromise();
+  updateUI();
+  if (m === 'formula' && window.MathJax?.typesetPromise) MathJax.typesetPromise();
 }
 
 const tasks = [
@@ -423,13 +566,14 @@ function check(i, b) {
 
 function summary() {
   const pct = Math.round(good / tasks.length * 100);
-  $('taskCard').innerHTML = `<div class="text-center p-5 bg-teal-50 border border-teal-200 rounded-xl"><h3 class="font-bold text-lg">Тренажер завершено</h3><p class="mt-2">${good} із ${tasks.length} • <b>${pct}%</b></p><button id="restart" class="mt-4 w-full py-2 bg-teal-700 text-white rounded-xl text-xs font-bold">Пройти ще раз</button></div>`;
+  $('taskCard').innerHTML = `<div class="text-center p-5 bg-teal-50 border border-teal-200 rounded-xl"><h3 class="font-bold text-lg">Тренажер завершено</h3><p class="mt-2">Правильних відповідей: <b>${good} із ${tasks.length}</b></p><p class="mt-1 text-sm">Результат: <b>${pct}%</b></p><button id="restart" class="mt-4 w-full py-2 bg-teal-700 text-white rounded-xl text-xs font-bold">Пройти ще раз</button></div>`;
   $('restart').onclick = () => location.reload();
 }
 
 function syncMirrors() {
   document.querySelectorAll('[data-mirror]').forEach(m => {
     const t = $(m.dataset.mirror);
+    if (!t) return;
     m.checked = t.checked;
     m.disabled = t.disabled;
   });
@@ -438,6 +582,7 @@ function syncMirrors() {
 function initMirrors() {
   document.querySelectorAll('[data-mirror]').forEach(m => m.onchange = () => {
     const t = $(m.dataset.mirror);
+    if (!t) return;
     t.checked = m.checked;
     t.dispatchEvent(new Event('change'));
     syncMirrors();
@@ -469,14 +614,18 @@ function openPanel(m) {
 
 document.addEventListener('DOMContentLoaded', () => {
   cache();
+  enhanceMethodicalUI();
   shapeButtons();
-  C.makeRegular.onclick = toggleReg;
+  C.makeRegular.onclick = stageAction;
+
   ['height','apothem','radius','face','base'].forEach(id => $(id).onchange = () => {
     build();
     syncMirrors();
   });
+
   C.ra.oninput = () => { a = +C.ra.value; build(); };
   C.rh.oninput = () => { h = +C.rh.value; build(); };
+
   $('reset').onclick = () => {
     camera.position.set(11,9,13);
     controls.target.set(0,h/2,0);
@@ -484,6 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   $('trans').onclick = () => { transparent = !transparent; build(); };
   $('wire').onclick = () => { wireframe = !wireframe; build(); };
+
   document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
     setMode(b.dataset.mode);
     if (matchMedia('(max-width:1023px)').matches) {
@@ -491,11 +641,13 @@ document.addEventListener('DOMContentLoaded', () => {
       else openPanel(b.dataset.mode);
     }
   }));
+
   $('next').onclick = () => ti < tasks.length - 1 ? loadTask(ti + 1) : summary();
   $('openHelp').onclick = () => { $('drawer').hidden = false; $('overlay').hidden = false; };
   $('closeHelp').onclick = $('overlay').onclick = () => { $('drawer').hidden = true; $('overlay').hidden = true; };
   $('mobileClose').onclick = closePanel;
   mobileBackdrop.onclick = closePanel;
+
   initMirrors();
   updateUI();
   loadTask(0);
