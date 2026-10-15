@@ -1,6 +1,16 @@
-let arbitraryHXFactor = 0.25;
-let arbitraryHZFactor = -0.16;
+const MAX_VERTEX_OFFSET_71 = 1.25;
+let arbitraryHXFactor = 0.85;
+let arbitraryHZFactor = -0.20;
 let vertexDragging = false;
+
+function clampVertexOffset71(x, z) {
+  const len = Math.hypot(x, z);
+  if (len <= MAX_VERTEX_OFFSET_71 || len === 0) return {x, z};
+  return {
+    x: x / len * MAX_VERTEX_OFFSET_71,
+    z: z / len * MAX_VERTEX_OFFSET_71
+  };
+}
 
 const originalEnhanceMethodicalUI71 = enhanceMethodicalUI;
 enhanceMethodicalUI = function () {
@@ -16,17 +26,19 @@ enhanceMethodicalUI = function () {
       <div>
         <div class="font-bold text-sky-900 flex items-center gap-2"><i class="fa-solid fa-arrows-up-down-left-right"></i> Положення вершини M</div>
         <p class="text-[11px] text-slate-600 mt-1">Перетягни точку <b>H</b> на моделі або зміни її положення повзунками. Вершина <b>M</b> рухається разом із H, а MH залишається перпендикулярною до площини основи.</p>
+        <p class="text-[11px] text-sky-800 mt-1"><b>Важливо:</b> у довільній піраміді точка H може лежати не лише всередині, а й <b>поза многокутником основи</b>.</p>
       </div>
       <div>
-        <div class="flex justify-between gap-2 mb-1"><span class="font-semibold">Ліворуч - праворуч</span><span id="vertexXValue" class="mono text-sky-800">25%</span></div>
-        <input id="vertexX" type="range" min="-60" max="60" step="1" value="25" class="w-full">
+        <div class="flex justify-between gap-2 mb-1"><span class="font-semibold">Ліворуч - праворуч</span><span id="vertexXValue" class="mono text-sky-800">85%</span></div>
+        <input id="vertexX" type="range" min="-125" max="125" step="1" value="85" class="w-full">
       </div>
       <div>
-        <div class="flex justify-between gap-2 mb-1"><span class="font-semibold">Назад - вперед</span><span id="vertexZValue" class="mono text-sky-800">-16%</span></div>
-        <input id="vertexZ" type="range" min="-60" max="60" step="1" value="-16" class="w-full">
+        <div class="flex justify-between gap-2 mb-1"><span class="font-semibold">Назад - вперед</span><span id="vertexZValue" class="mono text-sky-800">-20%</span></div>
+        <input id="vertexZ" type="range" min="-125" max="125" step="1" value="-20" class="w-full">
       </div>
-      <div class="grid grid-cols-2 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <button id="vertexRandom" type="button" class="py-2 px-2 rounded-lg bg-white border border-sky-300 text-sky-900 font-bold">Інше положення</button>
+        <button id="vertexOutside" type="button" class="py-2 px-2 rounded-lg bg-sky-700 text-white border border-sky-700 font-bold">Поза основою</button>
         <button id="vertexNearCenter" type="button" class="py-2 px-2 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold">Ближче до центра</button>
       </div>`;
 
@@ -42,24 +54,35 @@ enhanceMethodicalUI = function () {
       vz.value = String(Math.round(arbitraryHZFactor * 100));
     };
 
-    vx.addEventListener('input', () => {
-      arbitraryHXFactor = +vx.value / 100;
-      $('vertexXValue').textContent = `${vx.value}%`;
+    const applySliders = () => {
+      const clamped = clampVertexOffset71(+vx.value / 100, +vz.value / 100);
+      arbitraryHXFactor = clamped.x;
+      arbitraryHZFactor = clamped.z;
+      syncLabels();
       build();
-    });
-    vz.addEventListener('input', () => {
-      arbitraryHZFactor = +vz.value / 100;
-      $('vertexZValue').textContent = `${vz.value}%`;
-      build();
-    });
+    };
+
+    vx.addEventListener('input', applySliders);
+    vz.addEventListener('input', applySliders);
+
     $('vertexRandom').addEventListener('click', () => {
       const angle = Math.random() * Math.PI * 2;
-      const radius = 0.22 + Math.random() * 0.34;
+      const radius = 0.28 + Math.random() * 0.92;
       arbitraryHXFactor = Math.cos(angle) * radius;
       arbitraryHZFactor = Math.sin(angle) * radius;
       syncLabels();
       build();
     });
+
+    $('vertexOutside').addEventListener('click', () => {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 1.08 + Math.random() * 0.14;
+      arbitraryHXFactor = Math.cos(angle) * radius;
+      arbitraryHZFactor = Math.sin(angle) * radius;
+      syncLabels();
+      build();
+    });
+
     $('vertexNearCenter').addEventListener('click', () => {
       const len = Math.hypot(arbitraryHXFactor, arbitraryHZFactor) || 1;
       arbitraryHXFactor = arbitraryHXFactor / len * 0.18;
@@ -104,9 +127,9 @@ updateUI = function () {
   if (window.syncVertexPositionControls71) window.syncVertexPositionControls71();
 
   if (st === 0) {
-    C.hint.innerHTML = '<b>Крок 1.</b> Основа довільна. Можна змінювати положення вершини M, пересуваючи основу висоти H у площині основи. Потім перетвори основу на правильний n-кутник.';
+    C.hint.innerHTML = '<b>Крок 1.</b> Основа довільна. Пересувай основу висоти H у площині основи - вона може бути і всередині, і поза многокутником. Потім перетвори основу на правильний n-кутник.';
   } else if (st === 1) {
-    C.hint.innerHTML = '<b>Крок 2.</b> Основа вже правильна. Спробуй різні положення H і переконайся: піраміда стане правильною лише тоді, коли H збіжиться з центром O.';
+    C.hint.innerHTML = '<b>Крок 2.</b> Основа вже правильна. Спробуй різні положення H, у тому числі поза основою, і переконайся: піраміда стане правильною лише тоді, коли H збіжиться з центром O.';
   }
 };
 
@@ -149,16 +172,9 @@ function setupVertexDragging71() {
     raycaster.setFromCamera(pointerNdc(e), camera);
     if (!raycaster.ray.intersectPlane(plane, hit)) return;
     const R = a / (2 * Math.sin(Math.PI / n));
-    let fx = hit.x / R;
-    let fz = hit.z / R;
-    const len = Math.hypot(fx, fz);
-    const max = 0.60;
-    if (len > max) {
-      fx = fx / len * max;
-      fz = fz / len * max;
-    }
-    arbitraryHXFactor = fx;
-    arbitraryHZFactor = fz;
+    const clamped = clampVertexOffset71(hit.x / R, hit.z / R);
+    arbitraryHXFactor = clamped.x;
+    arbitraryHZFactor = clamped.z;
     if (window.syncVertexPositionControls71) window.syncVertexPositionControls71();
     build();
     e.preventDefault();
