@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Заняття 69. Призма</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#087E8B">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link rel="stylesheet" href="lesson-69-prism.css">
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+<header class="bg-teal-800 text-white shadow-md">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-xl shrink-0"><i class="fa-solid fa-cube text-amber-300"></i></div>
+      <div class="min-w-0"><h1 class="font-bold text-lg sm:text-xl leading-tight">Заняття 69. Призма</h1><p class="text-xs text-teal-100">Площа бічної і повної поверхні призми</p></div>
+    </div>
+    <nav class="flex flex-wrap gap-2" aria-label="Розділи інтерактиву">
+      <button id="openHelp" class="nav-btn bg-teal-900">Інструкція</button>
+      <button class="tab-btn nav-btn active" data-mode="model">Налаштування</button>
+      <button class="tab-btn nav-btn bg-teal-900" data-mode="properties">Властивості</button>
+      <button class="tab-btn nav-btn bg-teal-900" data-mode="formula">Формули</button>
+      <button class="tab-btn nav-btn bg-teal-900" data-mode="tasks">Тренажер</button>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto w-full p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+  <section class="lg:col-span-8 flex flex-col gap-3 min-w-0">
+    <div class="scene-card bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 relative flex flex-col flex-1 min-h-[520px]">
+      <div class="scene-top absolute top-3 left-3 right-3 z-10 flex justify-between gap-2 pointer-events-none">
+        <div class="scene-badge pointer-events-auto bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-700 text-white text-xs flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span><span id="badge" class="font-bold">Похила призма</span><span id="modeChip" class="chip oblique">похила</span>
+        </div>
+        <div id="viewBtns" class="pointer-events-auto flex gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700">
+          <button id="reset" title="Скинути камеру"><i class="fa-solid fa-arrows-rotate"></i></button>
+          <button id="trans" title="Прозорість"><i class="fa-solid fa-eye"></i><span> Грані</span></button>
+          <button id="wire" title="Каркас"><i class="fa-solid fa-border-all"></i></button>
+        </div>
+      </div>
+      <div id="canvas3d" class="w-full h-full flex-1"></div>
+      <div id="sceneOptionsDesktop" class="absolute bottom-3 left-3 right-3 z-10">
+        <div class="inline-flex flex-wrap gap-1.5 bg-slate-900/90 p-2 rounded-xl border border-slate-700 text-xs text-white">
+          <label><input id="height" type="checkbox" checked> Висота h</label>
+          <label><input id="edge" type="checkbox" checked> Бічне ребро b</label>
+          <label><input id="diag" type="checkbox"> Діагональ</label>
+          <label><input id="face" type="checkbox"> Бічна грань</label>
+          <label><input id="bases" type="checkbox"> Основи</label>
+        </div>
+      </div>
+    </div>
+    <div id="stats" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+      <div class="stat"><div>Висота h</div><b id="statH">6 см</b></div>
+      <div class="stat"><div>Бічне ребро b</div><b id="statB">6,95 см</b></div>
+      <div class="stat"><div>Кут α</div><b id="statAngle">59,7°</b></div>
+      <div class="stat"><div>S біч.</div><b id="statLat">—</b></div>
+      <div class="stat"><div>S повн.</div><b id="statTotal">—</b></div>
+    </div>
+  </section>
+
+  <aside id="mobilePanel" class="lg:col-span-4 flex flex-col gap-3">
+    <button id="mobileClose" aria-label="Закрити">✕</button>
+
+    <div id="panelModel" class="tab-panel panel space-y-4">
+      <h2 class="panel-title">Дослідження призми</h2>
+      <div class="transform-card">
+        <div class="flex justify-between gap-3"><div><div class="eyebrow">Послідовність</div><div id="status" class="font-extrabold text-sm">Бічні ребра нахилені до площини основи</div></div><i class="fa-solid fa-layer-group text-teal-700 text-xl"></i></div>
+        <div class="states">
+          <div id="stateOblique" class="state oblique">Похила<br><span>бічні ребра не ⟂ основі</span></div>
+          <div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+          <div id="stateDirect" class="state">Пряма<br><span>бічні ребра ⟂ основі</span></div>
+          <div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+          <div id="stateRegular" class="state">Правильна<br><span>пряма + правильна основа</span></div>
+        </div>
+        <button id="stageBtn" class="transform-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>Зробити прямою</span></button>
+        <p id="hint" class="text-[11px] text-slate-600 mt-2"></p>
+      </div>
+
+      <div><div class="text-xs font-bold mb-2">Кількість сторін основи</div><div id="shapeBtns" class="grid grid-cols-3 gap-1.5"></div></div>
+
+      <div class="controls-block">
+        <div><div class="control-head"><b>Висота h</b><span id="lh">6 см</span></div><input id="rh" type="range" min="2" max="12" step="0.5" value="6"></div>
+        <div id="shiftControl"><div class="control-head"><b>Зміщення верхньої основи d</b><span id="ld">3,5 см</span></div><input id="rd" type="range" min="0.5" max="8" step="0.5" value="3.5"></div>
+        <div id="sideControl" hidden><div class="control-head"><b>Сторона правильної основи a</b><span id="la">5 см</span></div><input id="ra" type="range" min="2" max="10" step="0.5" value="5"></div>
+      </div>
+
+      <div id="mobileSceneOptions" class="border-t pt-3">
+        <h3 class="font-bold text-sm mb-2">Елементи моделі</h3>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <label><input data-mirror="height" type="checkbox"> Висота h</label>
+          <label><input data-mirror="edge" type="checkbox"> Бічне ребро b</label>
+          <label><input data-mirror="diag" type="checkbox"> Діагональ</label>
+          <label><input data-mirror="face" type="checkbox"> Бічна грань</label>
+          <label><input data-mirror="bases" type="checkbox"> Основи</label>
+        </div>
+      </div>
+    </div>
+
+    <div id="panelProperties" class="tab-panel panel space-y-2" hidden>
+      <h2 class="panel-title">Основні поняття</h2>
+      <div class="info neutral"><b>Призма.</b> Дві її грані - рівні n-кутники в паралельних площинах, а бічні грані - паралелограми.</div>
+      <div class="info neutral"><b>Бічні ребра.</b> У призми вони рівні та паралельні.</div>
+      <div class="info blue"><b>Висота.</b> Перпендикуляр між площинами основ. У прямій призмі кожне бічне ребро є висотою.</div>
+      <div class="info amber"><b>Похила призма.</b> Бічні ребра не перпендикулярні до площини основи.</div>
+      <div class="info teal"><b>Пряма призма.</b> Бічні ребра перпендикулярні до площини основи, тому бічні грані - прямокутники.</div>
+      <div class="info green"><b>Правильна призма.</b> Пряма призма, в основі якої правильний многокутник.</div>
+      <div id="countCard" class="info violet"></div>
+      <div class="info rose"><b>Діагональ призми.</b> Відрізок, що сполучає дві вершини призми, які не належать одній грані. У трикутної призми просторової діагоналі немає.</div>
+    </div>
+
+    <div id="panelFormula" class="tab-panel panel space-y-3" hidden>
+      <h2 class="panel-title">Площі поверхні</h2>
+      <div id="formulaNotice" class="info amber"></div>
+      <div class="formula-card"><b>Для будь-якої призми</b>\[S_{повн}=S_{біч}+2S_{осн}\]</div>
+      <div id="directFormula" class="formula-card teal"><b>Для прямої призми</b>\[S_{біч}=P_{осн}\cdot h\]</div>
+      <div id="obliqueFormula" class="formula-card amber"><b>Для похилої призми</b><p class="mt-2">Площу бічної поверхні знаходимо як суму площ усіх бічних паралелограмів.</p></div>
+      <div id="calc" class="calc-box"></div>
+    </div>
+
+    <div id="panelTasks" class="tab-panel panel space-y-3" hidden>
+      <div class="flex justify-between border-b pb-2"><h2 class="font-bold text-sm">Тренажер</h2><span id="score" class="score">0 / 0</span></div>
+      <div id="taskCard" class="space-y-3">
+        <div class="task-question"><b id="taskNo"></b><p id="question" class="mt-1"></p></div>
+        <div id="opts" class="space-y-1.5"></div>
+        <div id="feedback" class="hidden"></div>
+        <button id="next" class="next-btn disabled"><span>Наступне завдання</span></button>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<div id="overlay" hidden></div>
+<aside id="drawer" hidden>
+  <button id="closeHelp" class="close-help">✕</button>
+  <h2 class="font-bold text-lg">Як працювати</h2>
+  <ol class="list-decimal pl-5 space-y-3 text-sm mt-4">
+    <li>Почни з похилої призми. Порівняй висоту h і бічне ребро b.</li>
+    <li>Змінюй зміщення верхньої основи d і спостерігай, як змінюються b та кут α.</li>
+    <li>Натисни «Зробити прямою». Переконайся, що b=h, а бічні грані стали прямокутниками.</li>
+    <li>Потім зроби основу правильною і отримай правильну призму.</li>
+    <li>Увімкни висоту, бічне ребро, грань, основи та діагональ. Для трикутної призми просторової діагоналі немає.</li>
+    <li>Порівняй формули для похилої та прямої призми і виконай тренажер.</li>
+  </ol>
+</aside>
+<div id="mobileBackdrop"></div>
+<script src="lesson-69-prism.js"></script>
+</body>
+</html>
