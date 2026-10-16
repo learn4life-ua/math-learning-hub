@@ -29,3 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const helpItems = document.querySelectorAll('#drawer ol li');
   if (helpItems[0]) helpItems[0].innerHTML = 'Почни з похилої призми. Увімкни висоту: вона проведена <b>з вершини верхньої основи</b> перпендикулярно до площини нижньої основи. Порівняй h і бічне ребро b.';
 });
+
+// Окремий шар буквеної нотації. Завантажуємо після уточнення геометрії висоти,
+// щоб A₁K будувалася за вже виправленими точками.
+(() => {
+  const script = document.createElement('script');
+  script.src = 'lesson-69-labels.js?v=20261016-1125';
+  document.body.appendChild(script);
+})();
