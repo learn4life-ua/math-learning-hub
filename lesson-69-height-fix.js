@@ -30,9 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (helpItems[0]) helpItems[0].innerHTML = 'Почни з похилої призми. Увімкни висоту: вона проведена <b>з вершини верхньої основи</b> перпендикулярно до площини нижньої основи. Порівняй h і бічне ребро b.';
 });
 
-// Окремий шар буквеної нотації та пояснення геометрії похилої призми.
+// Спочатку підключаємо буквені позначення, а після них - режим
+// «Зображення на площині», щоб обидва шари працювали узгоджено.
 (() => {
-  const script = document.createElement('script');
-  script.src = 'lesson-69-labels.js?v=20261016-1642';
-  document.body.appendChild(script);
+  const labelsScript = document.createElement('script');
+  labelsScript.src = 'lesson-69-labels.js?v=20261016-1642';
+  labelsScript.onload = () => {
+    const planeScript = document.createElement('script');
+    planeScript.src = 'lesson-69-plane-view.js?v=20261016-1718';
+    document.body.appendChild(planeScript);
+  };
+  document.body.appendChild(labelsScript);
 })();
