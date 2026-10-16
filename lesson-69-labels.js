@@ -40,8 +40,6 @@ function addPrismLabels69(G) {
   if (!group || !$('labels')?.checked) return;
 
   const letters = ['A','B','C','D','E','F','G','H'];
-  const subs = ['₁','₂','₃','₄','₅','₆','₇','₈','₉'];
-  const topSub = subs[0];
   const st = stage();
   const compact = matchMedia('(max-width: 520px)').matches;
   const scale = compact ? .82 : 1;
@@ -54,7 +52,7 @@ function addPrismLabels69(G) {
     low.position.y += .18;
     group.add(low);
 
-    const high = prismLabelSprite69(`${letters[i]}${topSub}`, i === 0 ? '#a7f3d0' : '#ccfbf1', scale);
+    const high = prismLabelSprite69(`${letters[i]}₁`, i === 0 ? '#a7f3d0' : '#ccfbf1', scale);
     high.position.copy(G.top[i]).add(outwardOffset69(G.top[i], out));
     high.position.y += .24;
     group.add(high);
@@ -74,14 +72,50 @@ build = function () {
   if ($('labels')?.checked) addPrismLabels69(geometry());
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+function ensureLabelControls69() {
+  if (!$('labels')) {
+    const desktopBox = document.querySelector('#sceneOptionsDesktop > div');
+    if (desktopBox) {
+      const label = document.createElement('label');
+      label.innerHTML = '<input id="labels" type="checkbox" checked> Позначення';
+      desktopBox.appendChild(label);
+    }
+  }
+
+  const mobileGrid = document.querySelector('#mobileSceneOptions .grid');
+  if (mobileGrid && !mobileGrid.querySelector('[data-mirror="labels"]')) {
+    const label = document.createElement('label');
+    label.innerHTML = '<input data-mirror="labels" type="checkbox" checked> Позначення';
+    mobileGrid.appendChild(label);
+  }
+}
+
+function bindLabelControls69() {
   const labels = $('labels');
-  if (labels) {
+  const mirror = document.querySelector('[data-mirror="labels"]');
+  if (!labels) return;
+
+  if (!labels.dataset.bound69) {
+    labels.dataset.bound69 = '1';
     labels.addEventListener('change', () => {
+      if (mirror) mirror.checked = labels.checked;
       build();
-      syncMirrors();
     });
   }
+
+  if (mirror && !mirror.dataset.bound69) {
+    mirror.dataset.bound69 = '1';
+    mirror.checked = labels.checked;
+    mirror.addEventListener('change', () => {
+      labels.checked = mirror.checked;
+      build();
+    });
+  }
+}
+
+function initPrismLabels69() {
+  ensureLabelControls69();
+  bindLabelControls69();
 
   // Коротко пояснюємо систему букв у властивостях.
   const heightCard = document.querySelector('#panelProperties .info.blue');
@@ -101,5 +135,11 @@ document.addEventListener('DOMContentLoaded', () => {
     help.insertBefore(li, help.children[1] || null);
   }
 
-  build();
-});
+  if (typeof build === 'function' && group) build();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPrismLabels69);
+} else {
+  initPrismLabels69();
+}
