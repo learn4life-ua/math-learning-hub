@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
   labelsScript.src = 'lesson-69-labels.js?v=20261016-1642';
   labelsScript.onload = () => {
     const planeScript = document.createElement('script');
-    planeScript.src = 'lesson-69-plane-view.js?v=20261017-1000';
+    planeScript.src = 'lesson-69-plane-view.js?v=20261017-1005';
     document.body.appendChild(planeScript);
   };
   document.body.appendChild(labelsScript);
