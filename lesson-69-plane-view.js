@@ -66,6 +66,7 @@
   function renderPlane69() {
     const svg = document.getElementById('planeSvg69');
     if (!svg || typeof geometry !== 'function') return;
+
     const G = geometry();
     const st = stage();
     svg.innerHTML = '';
@@ -80,26 +81,71 @@
     // Паралельна проєкція, близька до звичного шкільного стереометричного креслення.
     const rawProject = P => ({x:P.x + .52*P.z, y:-P.y + .24*P.z});
     const raw = [...G.bottom,...G.top,G.H].map(rawProject);
-    const minX=Math.min(...raw.map(p=>p.x)),maxX=Math.max(...raw.map(p=>p.x));
-    const minY=Math.min(...raw.map(p=>p.y)),maxY=Math.max(...raw.map(p=>p.y));
-    const usableW=700,usableH=440;
-    const sx=usableW/Math.max(maxX-minX,1),sy=usableH/Math.max(maxY-minY,1);
+    const minX=Math.min(...raw.map(p=>p.x)), maxX=Math.max(...raw.map(p=>p.x));
+    const minY=Math.min(...raw.map(p=>p.y)), maxY=Math.max(...raw.map(p=>p.y));
+    const usableW=700, usableH=440;
+    const sx=usableW/Math.max(maxX-minX,1), sy=usableH/Math.max(maxY-minY,1);
     const scale=Math.min(sx,sy);
-    const cx=(minX+maxX)/2,cy=(minY+maxY)/2;
-    const P = Q => { const r=rawProject(Q); return {x:500+(r.x-cx)*scale,y:355+(r.y-cy)*scale}; };
-    const bottom=G.bottom.map(P),top=G.top.map(P),K=P(G.H);
+    const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+    const P = Q => {
+      const r=rawProject(Q);
+      return {x:500+(r.x-cx)*scale, y:355+(r.y-cy)*scale};
+    };
+    const bottom=G.bottom.map(P), top=G.top.map(P), K=P(G.H);
 
-    const centerZ=G.bottom.reduce((s,p)=>s+p.z,0)/n;
     const letters=['A','B','C','D','E','F','G','H'];
     const line = (A,B,{stroke='#334155',width=3,dash='',opacity=1}={}) => {
-      svg.appendChild(svgEl69('line',{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke,'stroke-width':width,'stroke-linecap':'round','stroke-dasharray':dash,opacity}));
+      svg.appendChild(svgEl69('line',{
+        x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke,
+        'stroke-width':width,'stroke-linecap':'round',
+        'stroke-dasharray':dash,opacity
+      }));
     };
     const polygon = (pts,{fill='none',stroke='none',opacity=1}={}) => {
-      svg.appendChild(svgEl69('polygon',{points:pts.map(p=>`${p.x},${p.y}`).join(' '),fill,stroke,opacity}));
+      svg.appendChild(svgEl69('polygon',{
+        points:pts.map(p=>`${p.x},${p.y}`).join(' '),fill,stroke,opacity
+      }));
     };
     const label = (pt,text,{dx=0,dy=0,fill='#0f172a',size=22,weight=700,anchor='middle'}={}) => {
-      svg.appendChild(svgEl69('text',{x:pt.x+dx,y:pt.y+dy,fill,'font-size':size,'font-family':'Arial, sans-serif','font-weight':weight,'text-anchor':anchor,'paint-order':'stroke','stroke':'#fff','stroke-width':5,'stroke-linejoin':'round'},text));
+      svg.appendChild(svgEl69('text',{
+        x:pt.x+dx,y:pt.y+dy,fill,'font-size':size,
+        'font-family':'Arial, sans-serif','font-weight':weight,
+        'text-anchor':anchor,'paint-order':'stroke',
+        'stroke':'#fff','stroke-width':5,'stroke-linejoin':'round'
+      },text));
     };
+
+    // Визначення видимості ребер за видимістю прилеглих граней.
+    // Напрям до спостерігача узгоджений з rawProject:
+    // x' = x + 0.52z, y' = -y + 0.24z.
+    const viewDir = new THREE.Vector3(-.52,.24,1).normalize();
+    const all3d=[...G.bottom,...G.top];
+    const objectCenter=all3d.reduce((s,p)=>s.add(p),new THREE.Vector3()).multiplyScalar(1/all3d.length);
+
+    const faceFront = pts => {
+      if (!pts || pts.length < 3) return false;
+      const e1=new THREE.Vector3().subVectors(pts[1],pts[0]);
+      const e2=new THREE.Vector3().subVectors(pts[2],pts[0]);
+      const normal=new THREE.Vector3().crossVectors(e1,e2);
+      if (normal.lengthSq() < 1e-12) return false;
+
+      const faceCenter=pts.reduce((s,p)=>s.add(p),new THREE.Vector3()).multiplyScalar(1/pts.length);
+      const outward=faceCenter.clone().sub(objectCenter);
+      if (normal.dot(outward) < 0) normal.multiplyScalar(-1);
+
+      return normal.normalize().dot(viewDir) > 1e-7;
+    };
+
+    const topFront=faceFront(G.top);
+    const bottomFront=faceFront(G.bottom);
+    const sideFront=Array.from({length:n},(_,i)=>{
+      const j=(i+1)%n;
+      return faceFront([G.bottom[i],G.bottom[j],G.top[j],G.top[i]]);
+    });
+
+    const bottomEdgeVisible=i => bottomFront || sideFront[i];
+    const topEdgeVisible=i => topFront || sideFront[i];
+    const lateralEdgeVisible=i => sideFront[(i-1+n)%n] || sideFront[i];
 
     // Легке виділення основ або бічної грані, якщо відповідний перемикач увімкнено.
     if (C.bases?.checked) {
@@ -108,18 +154,18 @@
     }
     if (C.face?.checked) polygon([bottom[0],bottom[1],top[1],top[0]],{fill:'#fef3c7',opacity:.52});
 
-    // Нижня основа: далекі ребра штрихові, ближні - суцільні.
+    // Ребра креслення: суцільні, якщо ребро належить хоча б одній видимій грані.
+    // Якщо обидві прилеглі грані повернуті від спостерігача, ребро невидиме і штрихове.
     for(let i=0;i<n;i++){
       const j=(i+1)%n;
-      const far=((G.bottom[i].z+G.bottom[j].z)/2)>centerZ;
-      line(bottom[i],bottom[j],{dash:far?'9 8':'',width:3});
+      line(bottom[i],bottom[j],{dash:bottomEdgeVisible(i)?'':'9 8',width:3});
     }
-    // Верхня основа на навчальному кресленні читається суцільно.
-    for(let i=0;i<n;i++) line(top[i],top[(i+1)%n],{width:3});
-    // Бічні ребра: далекі штрихові.
     for(let i=0;i<n;i++){
-      const far=G.bottom[i].z>centerZ;
-      line(bottom[i],top[i],{dash:far?'9 8':'',width:3});
+      const j=(i+1)%n;
+      line(top[i],top[j],{dash:topEdgeVisible(i)?'':'9 8',width:3});
+    }
+    for(let i=0;i<n;i++){
+      line(bottom[i],top[i],{dash:lateralEdgeVisible(i)?'':'9 8',width:3});
     }
 
     // Діагональ призми за запитом.
@@ -130,23 +176,31 @@
       label(mid,'діагональ',{dy:-10,fill:'#92400e',size:17});
     }
 
-    const A=bottom[0],A1=top[0];
+    const A=bottom[0], A1=top[0];
     if (st===0) {
       // У похилій призмі показуємо прямокутний трикутник AA₁K.
       if (C.height?.checked) {
         line(A1,K,{stroke:'#e11d48',width:4,dash:'8 6'});
         const mh={x:(A1.x+K.x)/2,y:(A1.y+K.y)/2};
         label(mh,'h',{dx:18,fill:'#be123c',size:20});
-        const vx=A1.x-K.x,vy=A1.y-K.y,L=Math.hypot(vx,vy)||1;
-        const ux=vx/L,uy=vy/L,px=-uy,py=ux,s=18;
-        const p1={x:K.x+ux*s,y:K.y+uy*s},p2={x:p1.x+px*s,y:p1.y+py*s},p3={x:K.x+px*s,y:K.y+py*s};
-        svg.appendChild(svgEl69('polyline',{points:`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`,fill:'none',stroke:'#e11d48','stroke-width':3}));
+
+        const vx=A1.x-K.x, vy=A1.y-K.y, L=Math.hypot(vx,vy)||1;
+        const ux=vx/L, uy=vy/L, px=-uy, py=ux, s=18;
+        const p1={x:K.x+ux*s,y:K.y+uy*s};
+        const p2={x:p1.x+px*s,y:p1.y+py*s};
+        const p3={x:K.x+px*s,y:K.y+py*s};
+        svg.appendChild(svgEl69('polyline',{
+          points:`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`,
+          fill:'none',stroke:'#e11d48','stroke-width':3
+        }));
       }
+
       if (C.height?.checked && C.edge?.checked) {
         line(A,K,{stroke:'#d97706',width:3,dash:'7 6'});
         const md={x:(A.x+K.x)/2,y:(A.y+K.y)/2};
         label(md,'d',{dy:-9,fill:'#a16207',size:19});
       }
+
       if (C.edge?.checked) {
         line(A,A1,{stroke:'#0284c7',width:4});
         const mb={x:(A.x+A1.x)/2,y:(A.y+A1.y)/2};
@@ -154,12 +208,21 @@
       }
 
       if (C.height?.checked && C.edge?.checked) {
-        const v1={x:K.x-A.x,y:K.y-A.y},v2={x:A1.x-A.x,y:A1.y-A.y};
-        const a1=Math.atan2(v1.y,v1.x),a2=Math.atan2(v2.y,v2.x);
-        let delta=a2-a1; while(delta>Math.PI)delta-=2*Math.PI; while(delta<-Math.PI)delta+=2*Math.PI;
-        const r=34,steps=20,pts=[];
-        for(let i=0;i<=steps;i++){const t=a1+delta*i/steps;pts.push(`${A.x+r*Math.cos(t)},${A.y+r*Math.sin(t)}`)}
-        svg.appendChild(svgEl69('polyline',{points:pts.join(' '),fill:'none',stroke:'#d97706','stroke-width':3}));
+        const v1={x:K.x-A.x,y:K.y-A.y};
+        const v2={x:A1.x-A.x,y:A1.y-A.y};
+        const a1=Math.atan2(v1.y,v1.x), a2=Math.atan2(v2.y,v2.x);
+        let delta=a2-a1;
+        while(delta>Math.PI) delta-=2*Math.PI;
+        while(delta<-Math.PI) delta+=2*Math.PI;
+
+        const r=34, steps=20, pts=[];
+        for(let i=0;i<=steps;i++){
+          const t=a1+delta*i/steps;
+          pts.push(`${A.x+r*Math.cos(t)},${A.y+r*Math.sin(t)}`);
+        }
+        svg.appendChild(svgEl69('polyline',{
+          points:pts.join(' '),fill:'none',stroke:'#d97706','stroke-width':3
+        }));
         const am=a1+delta/2;
         label({x:A.x+(r+22)*Math.cos(am),y:A.y+(r+22)*Math.sin(am)},'α',{fill:'#92400e',size:20});
       }
@@ -174,9 +237,11 @@
     // Позначення вершин: показуємо їх завжди у 2D, бо це навчальне креслення.
     for(let i=0;i<n;i++){
       const rb=rawProject(G.bottom[i]);
-      const outward={x:rb.x-cx,y:rb.y-cy}; const L=Math.hypot(outward.x,outward.y)||1;
-      const dx=18*outward.x/L,dy=18*outward.y/L;
+      const outward={x:rb.x-cx,y:rb.y-cy};
+      const L=Math.hypot(outward.x,outward.y)||1;
+      const dx=18*outward.x/L, dy=18*outward.y/L;
       const baseText=(i===0&&st>0)?'A = K':letters[i];
+
       label(bottom[i],baseText,{dx,dy:dy+8,size:20});
       label(top[i],`${letters[i]}₁`,{dx,dy:dy-3,size:20});
       svg.appendChild(svgEl69('circle',{cx:bottom[i].x,cy:bottom[i].y,r:3.6,fill:'#334155'}));
@@ -209,9 +274,18 @@
   };
 
   ['height','edge','diag','face','bases'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', () => { if (view69 === 'plane') renderPlane69(); });
+    document.getElementById(id)?.addEventListener('change', () => {
+      if (view69 === 'plane') renderPlane69();
+    });
   });
-  document.querySelectorAll('#mobileSceneOptions input').forEach(el => el.addEventListener('change', () => setTimeout(() => { if (view69 === 'plane') renderPlane69(); }, 0)));
 
-  window.addEventListener('resize', () => { if (view69 === 'plane') renderPlane69(); });
+  document.querySelectorAll('#mobileSceneOptions input').forEach(el =>
+    el.addEventListener('change', () =>
+      setTimeout(() => { if (view69 === 'plane') renderPlane69(); }, 0)
+    )
+  );
+
+  window.addEventListener('resize', () => {
+    if (view69 === 'plane') renderPlane69();
+  });
 })();
