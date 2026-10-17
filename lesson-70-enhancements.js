@@ -2,7 +2,8 @@
 // 1) 3D-модель ↔ зображення на площині;
 // 2) висота A₁H і проєкція AH для похилого паралелепіпеда;
 // 3) коректні підписи величин;
-// 4) підсумок тренажера.
+// 4) підсумок тренажера;
+// 5) компактна мобільна шапка та узгоджена палітра.
 (() => {
   let view70 = '3d';
 
@@ -18,9 +19,20 @@
     const s = document.createElement('style');
     s.id = 'lesson70EnhancementStyles';
     s.textContent = `
+      /* Основна палітра узгоджена із заняттями 69 і 71: teal + slate. */
+      body>header{background:#115e59!important}
+      body>header #openInstructions,
+      body>header .tab-btn:not(.bg-white){background:#134e4a!important;color:#ccfbf1!important}
+      body>header .tab-btn.bg-white{color:#115e59!important}
+      input[type=range]{accent-color:#0f766e!important}
+      #shapeHint{background:#f0fdfa!important;border-color:#99f6e4!important;color:#134e4a!important}
+      .shape-btn.bg-indigo-50{background:#f0fdfa!important;border-color:#2dd4bf!important;color:#134e4a!important}
+      #panelModel #labelA,#panelModel #labelB,#panelModel #labelC{color:#0f766e!important;background:#f0fdfa!important}
+      #quizScore{background:#f0fdfa!important;color:#115e59!important}
+
       #viewSwitch70{position:absolute;z-index:18;top:60px;left:50%;transform:translateX(-50%);display:flex;gap:3px;padding:4px;border-radius:12px;background:rgba(15,23,42,.9);border:1px solid #475569;box-shadow:0 6px 20px rgba(15,23,42,.18)}
       #viewSwitch70 button{min-height:34px;padding:7px 12px;border:0;border-radius:9px;background:transparent;color:#cbd5e1;font-size:11px;font-weight:800;white-space:nowrap}
-      #viewSwitch70 button.active{background:#fff;color:#4338ca;box-shadow:0 2px 8px rgba(15,23,42,.16)}
+      #viewSwitch70 button.active{background:#fff;color:#0f766e;box-shadow:0 2px 8px rgba(15,23,42,.16)}
       #plane70{display:none;position:absolute;inset:0;background:#fcfcfb;overflow:hidden}
       #plane70 svg{display:block;width:100%;height:100%}
       #plane70 .paper-note{position:absolute;z-index:3;top:108px;left:50%;transform:translateX(-50%);padding:5px 10px;border:1px solid #e2e8f0;border-radius:999px;background:rgba(255,255,255,.94);color:#64748b;font-size:10px;font-weight:700;white-space:nowrap}
@@ -30,26 +42,43 @@
       .lesson70-plane-mode #sceneViewControls{display:none!important}
       .lesson70-plane-mode #sceneElementControlsWrap>div{background:rgba(255,255,255,.96)!important;border-color:#cbd5e1!important;color:#334155!important}
       .lesson70-plane-mode #sceneElementControlsWrap label{background:#f8fafc!important;color:#334155!important;border:1px solid #e2e8f0}
+
       @media(max-width:1023px){
-        body>header>div{display:block!important;padding:8px 10px!important}
-        body>header>div>div:first-child{gap:8px!important;min-width:0}
-        body>header>div>div:first-child>div:first-child{width:34px!important;height:34px!important;border-radius:10px!important;flex:0 0 auto}
-        body>header h1{font-size:14px!important;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 70px)}
+        body>header{position:relative!important;z-index:60}
+        body>header>div{display:block!important;padding:6px 8px!important}
+        body>header>div>div:first-child{gap:7px!important;min-width:0}
+        body>header>div>div:first-child>div:first-child{width:32px!important;height:32px!important;border-radius:9px!important;flex:0 0 auto}
+        body>header h1{font-size:13.5px!important;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 58px)}
         body>header p{display:none!important}
-        body>header nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px!important;margin-top:7px;overflow:visible!important;padding:0!important;width:100%}
-        body>header nav button{width:100%!important;min-width:0!important;min-height:36px!important;padding:6px 4px!important;font-size:10px!important;line-height:1.15;white-space:normal}
-        body>main{height:calc(100dvh - var(--lesson-header-height,126px))!important;padding:6px!important}
-        body>main>section>div:first-child{height:100%!important;min-height:0!important;border-radius:16px!important}
-        #canvas3d{height:100%!important;min-height:0!important}
-        #viewSwitch70{top:54px;max-width:calc(100% - 20px)}
-        #viewSwitch70 button{font-size:10px;padding:7px 9px}
-        #plane70 .paper-note{top:101px}
+
+        /* П'ять кнопок в один ряд - шапка не забирає третину екрана. */
+        body>header nav{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;margin-top:5px!important;overflow:visible!important;padding:0!important;width:100%}
+        body>header nav button{width:100%!important;min-width:0!important;min-height:37px!important;height:37px!important;padding:3px 2px!important;font-size:0!important;line-height:1!important;white-space:nowrap!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:1px!important;border-radius:9px!important}
+        body>header nav button i{font-size:11px!important;line-height:1!important}
+        body>header nav #openInstructions::after{content:'Інструкція'}
+        body>header nav #btnTabModel::after{content:'Модель'}
+        body>header nav #btnTabProps::after{content:'Власт.'}
+        body>header nav #btnTabTheorem::after{content:'Теорема'}
+        body>header nav #btnTabTasks::after{content:'Тренажер'}
+        body>header nav button::after{font-size:8.5px!important;font-weight:700;line-height:1.05}
+
+        body>main{height:calc(100dvh - var(--lesson-header-height,84px))!important;padding:5px!important}
+        body>main>section{height:100%!important;min-height:0!important}
+        body>main>section>div:first-child{height:100%!important;min-height:0!important;border-radius:15px!important}
+        #canvas3d{height:100%!important;min-height:0!important;touch-action:none}
+        #rectStats{display:none!important}
+
+        #viewSwitch70{top:51px;max-width:calc(100% - 16px)}
+        #viewSwitch70 button{font-size:9.5px;padding:6px 8px;min-height:32px}
+        #plane70 .paper-note{top:94px}
+        #sceneViewControls{top:auto}
       }
+
       @media(max-width:440px){
-        #viewSwitch70{left:8px;right:8px;transform:none;display:grid;grid-template-columns:1fr 1fr}
-        #viewSwitch70 button{min-width:0;padding:7px 5px}
-        #plane70 .paper-note{max-width:calc(100% - 28px);overflow:hidden;text-overflow:ellipsis}
-        body>header nav button{font-size:9.7px!important;padding:6px 3px!important}
+        #viewSwitch70{left:7px;right:7px;transform:none;display:grid;grid-template-columns:1fr 1fr}
+        #viewSwitch70 button{min-width:0;padding:6px 4px}
+        #plane70 .paper-note{max-width:calc(100% - 24px);overflow:hidden;text-overflow:ellipsis}
+        body>header nav button::after{font-size:8px!important}
       }
     `;
     document.head.appendChild(s);
@@ -207,8 +236,8 @@
     ];
 
     if (document.getElementById('chkOppFaces')?.checked) {
-      polygon([q[0],q[1],q[5],q[4]],'#c4b5fd',.38);
-      polygon([q[2],q[3],q[7],q[6]],'#c4b5fd',.28);
+      polygon([q[0],q[1],q[5],q[4]],'#99f6e4',.32);
+      polygon([q[2],q[3],q[7],q[6]],'#a7f3d0',.24);
     }
 
     edges.forEach(([i,j,fs])=>line(q[i],q[j],{dash:(front[fs[0]]||front[fs[1]])?'':'9 8'}));
@@ -264,14 +293,40 @@
     const card=document.getElementById('taskCard');
     if(!card)return;
     const pct=Math.round((scoreCorrect/taskPool.length)*100);
-    card.innerHTML=`<div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50 text-center space-y-2"><div class="text-xs uppercase tracking-wider font-bold text-indigo-600">Підсумок</div><div class="text-3xl font-extrabold text-indigo-800">${scoreCorrect} / ${taskPool.length}</div><p class="text-xs text-slate-700">${pct>=80?'Матеріал засвоєно впевнено.':pct>=60?'Основне зрозуміло. Варто повторити завдання з помилками.':'Повернися до властивостей і теореми, а потім спробуй ще раз.'}</p><button id="restart70" class="mt-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold">Пройти ще раз</button></div>`;
-    document.getElementById('restart70').onclick=()=>{scoreCorrect=0;scoreTotal=0;currentTaskIndex=0;document.getElementById('quizScore').textContent='0 / 0';card.innerHTML='<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs"><div class="font-bold text-indigo-900 mb-1" id="taskNumber"></div><p id="taskQuestion" class="leading-relaxed text-slate-800"></p></div><div class="space-y-1.5" id="taskOptions"></div><div id="taskFeedback" class="hidden p-3 rounded-xl text-xs font-medium"></div><button id="btnNextTask" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 opacity-50 pointer-events-none"><span>Наступне завдання</span><i class="fa-solid fa-arrow-right"></i></button>';bindNext70();loadTask(0)};
+    card.innerHTML=`<div class="p-4 rounded-xl border border-teal-200 bg-teal-50 text-center space-y-2"><div class="text-xs uppercase tracking-wider font-bold text-teal-700">Підсумок</div><div class="text-3xl font-extrabold text-teal-800">${scoreCorrect} / ${taskPool.length}</div><p class="text-xs text-slate-700">${pct>=80?'Матеріал засвоєно впевнено.':pct>=60?'Основне зрозуміло. Варто повторити завдання з помилками.':'Повернися до властивостей і теореми, а потім спробуй ще раз.'}</p><button id="restart70" class="mt-2 px-4 py-2 rounded-xl bg-teal-700 text-white text-xs font-bold">Пройти ще раз</button></div>`;
+    document.getElementById('restart70').onclick=()=>{scoreCorrect=0;scoreTotal=0;currentTaskIndex=0;document.getElementById('quizScore').textContent='0 / 0';card.innerHTML='<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs"><div class="font-bold text-teal-900 mb-1" id="taskNumber"></div><p id="taskQuestion" class="leading-relaxed text-slate-800"></p></div><div class="space-y-1.5" id="taskOptions"></div><div id="taskFeedback" class="hidden p-3 rounded-xl text-xs font-medium"></div><button id="btnNextTask" class="w-full py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 opacity-50 pointer-events-none"><span>Наступне завдання</span><i class="fa-solid fa-arrow-right"></i></button>';bindNext70();loadTask(0)};
   }
 
   function bindNext70(){
     const btn=document.getElementById('btnNextTask');
     if(!btn)return;
     btn.onclick=()=>{if(currentTaskIndex<taskPool.length-1)loadTask(currentTaskIndex+1);else summary70()};
+  }
+
+  function fitMobileCamera70() {
+    if (!camera || !controls || !window.matchMedia('(max-width:1023px)').matches) return;
+    camera.position.set(8.4,6.6,9.6);
+    camera.zoom = 1.08;
+    camera.updateProjectionMatrix();
+    controls.target.set(0, Math.max(1.6, paramC * .38), 0);
+    controls.update();
+    if (typeof onResize === 'function') onResize();
+  }
+
+  function bindReset70() {
+    const reset=document.getElementById('btnReset');
+    if(!reset)return;
+    reset.onclick=()=>{
+      if(window.matchMedia('(max-width:1023px)').matches){
+        fitMobileCamera70();
+      } else {
+        camera.zoom=1;
+        camera.position.set(11,9,13);
+        controls.target.set(0,paramC/2,0);
+        camera.updateProjectionMatrix();
+        controls.update();
+      }
+    };
   }
 
   const originalBuild70=buildModel;
@@ -292,12 +347,14 @@
   document.addEventListener('DOMContentLoaded',()=>{
     ensureUI70();
     bindNext70();
+    bindReset70();
     const h=document.getElementById('chkHeight70');
     const hm=document.querySelector('[data-height70]');
     h?.addEventListener('change',()=>{if(hm)hm.checked=h.checked;buildModel()});
     hm?.addEventListener('change',()=>{if(h)h.checked=hm.checked;buildModel()});
     document.querySelectorAll('#sceneElementControlsWrap input,#mobileSceneOptions input').forEach(x=>x.addEventListener('change',()=>{if(view70==='plane')setTimeout(renderPlane70,0)}));
     relabelStats70();
+    requestAnimationFrame(()=>requestAnimationFrame(fitMobileCamera70));
   });
 
   window.addEventListener('resize',()=>{if(view70==='plane')renderPlane70()});
