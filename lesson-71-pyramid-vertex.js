@@ -1,6 +1,8 @@
 const MAX_VERTEX_OFFSET_71 = 1.25;
-let arbitraryHXFactor = 0.85;
-let arbitraryHZFactor = -0.20;
+// Початково H розташовуємо виразно всередині основи. Винесення H за межі
+// многокутника залишається окремою дослідницькою дією через кнопку «Поза основою».
+let arbitraryHXFactor = 0.34;
+let arbitraryHZFactor = -0.12;
 let vertexDragging = false;
 
 function clampVertexOffset71(x, z) {
@@ -29,12 +31,12 @@ enhanceMethodicalUI = function () {
         <p class="text-[11px] text-sky-800 mt-1"><b>Важливо:</b> у довільній піраміді точка H може лежати не лише всередині, а й <b>поза многокутником основи</b>.</p>
       </div>
       <div>
-        <div class="flex justify-between gap-2 mb-1"><span class="font-semibold">Ліворуч - праворуч</span><span id="vertexXValue" class="mono text-sky-800">85%</span></div>
-        <input id="vertexX" type="range" min="-125" max="125" step="1" value="85" class="w-full">
+        <div class="flex justify-between gap-2 mb-1"><span class="font-semibold">Ліворуч - праворуч</span><span id="vertexXValue" class="mono text-sky-800">34%</span></div>
+        <input id="vertexX" type="range" min="-125" max="125" step="1" value="34" class="w-full">
       </div>
       <div>
-        <div class="flex justify-between gap-2 mb-1"><span class="font-semibold">Назад - вперед</span><span id="vertexZValue" class="mono text-sky-800">-20%</span></div>
-        <input id="vertexZ" type="range" min="-125" max="125" step="1" value="-20" class="w-full">
+        <div class="flex justify-between gap-2 mb-1"><span class="font-semibold">Назад - вперед</span><span id="vertexZValue" class="mono text-sky-800">-12%</span></div>
+        <input id="vertexZ" type="range" min="-125" max="125" step="1" value="-12" class="w-full">
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <button id="vertexRandom" type="button" class="py-2 px-2 rounded-lg bg-white border border-sky-300 text-sky-900 font-bold">Інше положення</button>
