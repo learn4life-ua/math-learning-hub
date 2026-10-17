@@ -32,7 +32,6 @@ body:has(#modeChip.free) #panelModel .space-y-3.text-xs.border-t.pt-3::before{co
  body>header h1{font-size:14px!important;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 70px)}
  body>header p{display:none!important}
 
- /* На телефоні всі кнопки розділів завжди видно. Без прихованого горизонтального скролу. */
  body>header nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px!important;margin-top:7px;overflow:visible!important;padding:0!important}
  body>header nav button{width:100%!important;min-width:0!important;min-height:38px!important;padding:6px 5px!important;font-size:10.5px!important;line-height:1.15;white-space:normal}
 
@@ -60,11 +59,9 @@ body:has(#modeChip.free) #panelModel .space-y-3.text-xs.border-t.pt-3::before{co
  .states .arrow{transform:none;text-align:center;font-size:10px}
  .state{font-size:9px;padding:7px 5px;border-radius:10px;min-width:0}
 
- /* Кнопки вибору форми основи не ховаємо й робимо зручними для пальця. */
  #shapeBtns{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
  #shapeBtns button{min-height:42px!important;font-size:11px!important;padding:8px 5px!important}
 
- /* Базові регулятори показуємо вище розширеного керування вершиною. */
  #panelModel .mobile-basic-controls-71{display:flex!important;flex-direction:column!important;gap:12px!important}
  #heightControl71{order:1}
  #baseSideControl71{order:2}
@@ -93,3 +90,25 @@ body:has(#modeChip.free) #panelModel .space-y-3.text-xs.border-t.pt-3::before{co
 }
 
 @media(min-width:1024px){#mobileSceneOptions{display:none}}
+
+/* 17.10.2026 - компактніша мобільна композиція та більше поле моделі */
+@media(max-width:1023px){
+ body>header>div{padding:6px 8px!important}
+ body>header>div>div:first-child>div:first-child{width:32px!important;height:32px!important;border-radius:9px!important}
+ body>header h1{font-size:13.5px!important;line-height:1.15!important}
+ body>header nav{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;margin-top:5px!important}
+ body>header nav button{height:36px!important;min-height:36px!important;padding:3px 2px!important;font-size:9px!important;line-height:1.05!important;white-space:normal!important;border-radius:9px!important}
+ body>main{height:calc(100dvh - var(--hh,82px))!important;padding:5px!important}
+ body>main>section{height:100%!important;min-height:0!important}
+ body>main>section>div:first-child{height:100%!important;min-height:0!important;border-radius:15px!important}
+ #canvas3d{height:100%!important;min-height:0!important}
+ #viewBtns button{width:36px!important;height:36px!important}
+ #badge{font-size:10.5px!important}
+ #mobilePanel{max-height:min(84dvh,calc(100dvh - 70px))!important}
+}
+
+/* Палітра: один основний teal, slate для сцени, акценти лише за математичним змістом. */
+body>header{background:#115e59!important}
+.transform-btn,#next{background:#0f766e!important}
+#score{background:#f0fdfa!important;color:#115e59!important}
+#panelModel input[type=range]{accent-color:#0f766e!important}
