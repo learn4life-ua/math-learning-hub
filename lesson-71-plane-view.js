@@ -63,7 +63,10 @@
     const cv=document.createElement('canvas');cv.width=128;cv.height=96;
     const x=cv.getContext('2d');x.font='700 42px Arial';x.textAlign='center';x.textBaseline='middle';x.lineWidth=7;x.strokeStyle='rgba(15,23,42,.92)';x.strokeText(text,64,48);x.fillStyle=color;x.fillText(text,64,48);
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false,depthWrite:false}));
-    const compact=matchMedia('(max-width:520px)').matches;sp.scale.set(compact?.62:.76,compact?.47:.57,1);sp.renderOrder=20;return sp;
+    const compact=matchMedia('(max-width:520px)').matches;
+    sp.scale.set(compact ? .62 : .76, compact ? .47 : .57, 1);
+    sp.renderOrder=20;
+    return sp;
   }
 
   function addBaseLabels3D71(){
@@ -72,8 +75,11 @@
     for(let i=0;i<n;i++){
       point(G.base[i],0xe2e8f0,.065);
       const s=baseLabelSprite71(letters71[i]||String(i+1));
-      const out=G.base[i].clone().setY(0);if(out.lengthSq()<1e-8)out.set(1,0,1);out.normalize().multiplyScalar(matchMedia('(max-width:520px)').matches?.24:.34);
-      s.position.copy(G.base[i]).add(out).add(new THREE.Vector3(0,.14,0));group.add(s);
+      const out=G.base[i].clone().setY(0);
+      if(out.lengthSq()<1e-8)out.set(1,0,1);
+      out.normalize().multiplyScalar(matchMedia('(max-width:520px)').matches ? .24 : .34);
+      s.position.copy(G.base[i]).add(out).add(new THREE.Vector3(0,.14,0));
+      group.add(s);
     }
   }
 
