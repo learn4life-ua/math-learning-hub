@@ -30,8 +30,27 @@
       .lesson70-plane-mode #sceneViewControls{display:none!important}
       .lesson70-plane-mode #sceneElementControlsWrap>div{background:rgba(255,255,255,.96)!important;border-color:#cbd5e1!important;color:#334155!important}
       .lesson70-plane-mode #sceneElementControlsWrap label{background:#f8fafc!important;color:#334155!important;border:1px solid #e2e8f0}
-      @media(max-width:1023px){#viewSwitch70{top:56px;max-width:calc(100% - 20px)}#viewSwitch70 button{font-size:10px;padding:7px 9px}#plane70 .paper-note{top:103px}}
-      @media(max-width:440px){#viewSwitch70{left:8px;right:8px;transform:none;display:grid;grid-template-columns:1fr 1fr}#viewSwitch70 button{min-width:0;padding:7px 5px}#plane70 .paper-note{max-width:calc(100% - 28px);overflow:hidden;text-overflow:ellipsis}}
+      @media(max-width:1023px){
+        body>header>div{display:block!important;padding:8px 10px!important}
+        body>header>div>div:first-child{gap:8px!important;min-width:0}
+        body>header>div>div:first-child>div:first-child{width:34px!important;height:34px!important;border-radius:10px!important;flex:0 0 auto}
+        body>header h1{font-size:14px!important;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 70px)}
+        body>header p{display:none!important}
+        body>header nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px!important;margin-top:7px;overflow:visible!important;padding:0!important;width:100%}
+        body>header nav button{width:100%!important;min-width:0!important;min-height:36px!important;padding:6px 4px!important;font-size:10px!important;line-height:1.15;white-space:normal}
+        body>main{height:calc(100dvh - var(--lesson-header-height,126px))!important;padding:6px!important}
+        body>main>section>div:first-child{height:100%!important;min-height:0!important;border-radius:16px!important}
+        #canvas3d{height:100%!important;min-height:0!important}
+        #viewSwitch70{top:54px;max-width:calc(100% - 20px)}
+        #viewSwitch70 button{font-size:10px;padding:7px 9px}
+        #plane70 .paper-note{top:101px}
+      }
+      @media(max-width:440px){
+        #viewSwitch70{left:8px;right:8px;transform:none;display:grid;grid-template-columns:1fr 1fr}
+        #viewSwitch70 button{min-width:0;padding:7px 5px}
+        #plane70 .paper-note{max-width:calc(100% - 28px);overflow:hidden;text-overflow:ellipsis}
+        body>header nav button{font-size:9.7px!important;padding:6px 3px!important}
+      }
     `;
     document.head.appendChild(s);
   }
@@ -59,7 +78,6 @@
 
     sw.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => setView70(btn.dataset.view70)));
 
-    // Окремий перемикач висоти: у похилому випадку він методично важливий.
     if (!document.getElementById('chkHeight70')) {
       const desktop = document.querySelector('#sceneElementControlsWrap > div');
       if (desktop) {
@@ -256,7 +274,6 @@
     btn.onclick=()=>{if(currentTaskIndex<taskPool.length-1)loadTask(currentTaskIndex+1);else summary70()};
   }
 
-  // Обгортаємо наявні функції, не змінюючи основну логіку заняття.
   const originalBuild70=buildModel;
   buildModel=function(){originalBuild70();addHeight3D70();relabelStats70();if(view70==='plane')renderPlane70()};
 
