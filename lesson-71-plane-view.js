@@ -2,7 +2,8 @@
 // та методично коректні числові показники для трьох станів піраміди.
 (() => {
   let view71 = '3d';
-  const letters71 = ['A','B','C','D','E','F','G','H'];
+  // H зарезервовано для основи висоти, тому у восьмикутній основі після G використовуємо K.
+  const letters71 = ['A','B','C','D','E','F','G','K'];
 
   function svgEl71(name, attrs = {}, text = '') {
     const el = document.createElementNS('http://www.w3.org/2000/svg', name);
@@ -46,7 +47,7 @@
     card.appendChild(sw);
     const plane=document.createElement('div');
     plane.id='plane71';
-    plane.innerHTML='<div class="paper-note">Так піраміду зображають на площині аркуша</div><svg id="planeSvg71" viewBox="0 0 1000 650" role="img" aria-label="Стереометричне креслення піраміди"></svg>';
+    plane.innerHTML='<div class="paper-note">Так піраміду зображають на площині аркуша · схематично, не в масштабі</div><svg id="planeSvg71" viewBox="0 0 1000 650" role="img" aria-label="Стереометричне креслення піраміди"></svg>';
     card.appendChild(plane);
     sw.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>setView71(b.dataset.view71)));
   }
@@ -116,6 +117,15 @@
     const line=(A,B,{stroke='#334155',width=3,dash='',opacity=1}={})=>svg.appendChild(svgEl71('line',{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke,'stroke-width':width,'stroke-linecap':'round','stroke-dasharray':dash,opacity}));
     const label=(pt,text,{dx=0,dy=0,fill='#0f172a',size=21}={})=>svg.appendChild(svgEl71('text',{x:pt.x+dx,y:pt.y+dy,fill,'font-size':size,'font-family':'Arial, sans-serif','font-weight':700,'text-anchor':'middle','paint-order':'stroke',stroke:'#fff','stroke-width':5,'stroke-linejoin':'round'},text));
     const polygon=(pts,fill,opacity=.3)=>svg.appendChild(svgEl71('polygon',{points:pts.map(p=>`${p.x},${p.y}`).join(' '),fill,opacity}));
+    const rightMark=(origin,A,B,color='#334155',size=17)=>{
+      const u={x:A.x-origin.x,y:A.y-origin.y},v={x:B.x-origin.x,y:B.y-origin.y};
+      const lu=Math.hypot(u.x,u.y)||1,lv=Math.hypot(v.x,v.y)||1;
+      u.x/=lu;u.y/=lu;v.x/=lv;v.y/=lv;
+      const p1={x:origin.x+u.x*size,y:origin.y+u.y*size};
+      const c={x:p1.x+v.x*size,y:p1.y+v.y*size};
+      const p2={x:origin.x+v.x*size,y:origin.y+v.y*size};
+      svg.appendChild(svgEl71('polyline',{points:`${p1.x},${p1.y} ${c.x},${c.y} ${p2.x},${p2.y}`,fill:'none',stroke:color,'stroke-width':3,'stroke-linejoin':'round'}));
+    };
 
     const all3=[...G.base,G.apex],center=all3.reduce((s,p)=>s.add(p),new THREE.Vector3()).multiplyScalar(1/all3.length),viewDir=new THREE.Vector3(-.52,.24,1).normalize();
     const faceFront=pts=>{const e1=new THREE.Vector3().subVectors(pts[1],pts[0]),e2=new THREE.Vector3().subVectors(pts[2],pts[0]),nr=new THREE.Vector3().crossVectors(e1,e2);if(nr.lengthSq()<1e-10)return false;const fc=pts.reduce((s,p)=>s.add(p),new THREE.Vector3()).multiplyScalar(1/pts.length);if(nr.dot(fc.clone().sub(center))<0)nr.multiplyScalar(-1);return nr.normalize().dot(viewDir)>1e-7};
@@ -124,7 +134,19 @@
     if(C.base?.checked)polygon(b,'#c4b5fd',.32);if(C.face?.checked)polygon([b[0],b[1],M],'#fde68a',.46);
     for(let i=0;i<n;i++){const j=(i+1)%n;line(b[i],b[j],{dash:(baseFront||sideFront[i])?'':'9 8'});line(b[i],M,{dash:(sideFront[(i-1+n)%n]||sideFront[i])?'':'9 8'});}
 
-    if(C.height?.checked){line(M,H,{stroke:'#e11d48',width:3.5,dash:'8 6'});const v={x:M.x-H.x,y:M.y-H.y},L=Math.hypot(v.x,v.y)||1,ux=v.x/L,uy=v.y/L;let q={x:b[0].x-H.x,y:b[0].y-H.y},QL=Math.hypot(q.x,q.y)||1;q={x:q.x/QL,y:q.y/QL};const s=17,p1={x:H.x+ux*s,y:H.y+uy*s},c={x:p1.x+q.x*s,y:p1.y+q.y*s},p2={x:H.x+q.x*s,y:H.y+q.y*s};svg.appendChild(svgEl71('polyline',{points:`${p1.x},${p1.y} ${c.x},${c.y} ${p2.x},${p2.y}`,fill:'none',stroke:'#e11d48','stroke-width':3}));label({x:(M.x+H.x)/2,y:(M.y+H.y)/2},regular()?'MO = h':'MH = h',{dx:20,fill:'#be123c',size:18});}
+    if(C.height?.checked){
+      line(M,H,{stroke:'#e11d48',width:3.5,dash:'8 6'});
+      if(regular()){
+        if(C.radius?.checked) rightMark(H,M,N,'#e11d48',17);
+      }else{
+        const q={x:b[0].x-H.x,y:b[0].y-H.y},ql=Math.hypot(q.x,q.y)||1;
+        q.x/=ql;q.y/=ql;
+        const guide={x:H.x+q.x*68,y:H.y+q.y*68};
+        line(H,guide,{stroke:'#d97706',width:2,dash:'6 6',opacity:.72});
+        rightMark(H,M,guide,'#e11d48',17);
+      }
+      label({x:(M.x+H.x)/2,y:(M.y+H.y)/2},regular()?'MO = h':'MH = h',{dx:20,fill:'#be123c',size:18});
+    }
 
     if(st<2){label(H,'H',{dx:17,dy:21,fill:'#b45309'});}
     if(baseIsRegular()){
@@ -132,9 +154,13 @@
       if(st===1)line(H,O,{stroke:'#d97706',width:2.6,dash:'7 6'});
       label(O,regular()?'O = H':'O',{dx:-18,dy:18,fill:'#047857',size:19});
     }
-    if(regular()&&C.apothem?.checked){line(M,N,{stroke:'#0891b2',width:3});label({x:(M.x+N.x)/2,y:(M.y+N.y)/2},'MN = l',{dx:-24,fill:'#0e7490',size:18});}
+    if(regular()&&C.apothem?.checked){
+      line(M,N,{stroke:'#0891b2',width:3});
+      label({x:(M.x+N.x)/2,y:(M.y+N.y)/2},'MN = l',{dx:-24,fill:'#0e7490',size:18});
+      rightMark(N,M,b[0],'#0891b2',15);
+    }
     if(regular()&&C.radius?.checked){line(O,N,{stroke:'#059669',width:2.6,dash:'7 6'});label({x:(O.x+N.x)/2,y:(O.y+N.y)/2},'ON',{dy:-10,fill:'#047857',size:17});}
-    if(regular()){svg.appendChild(svgEl71('circle',{cx:N.x,cy:N.y,r:4,fill:'#0891b2'}));label(N,'N',{dx:15,dy:18,fill:'#0e7490',size:18});}
+    if(regular()&&(C.apothem?.checked||C.radius?.checked)){svg.appendChild(svgEl71('circle',{cx:N.x,cy:N.y,r:4,fill:'#0891b2'}));label(N,'N',{dx:15,dy:18,fill:'#0e7490',size:18});}
 
     const pc={x:b.reduce((s,p)=>s+p.x,0)/n,y:b.reduce((s,p)=>s+p.y,0)/n};
     b.forEach((pt,i)=>{const dx=pt.x-pc.x,dy=pt.y-pc.y,L=Math.hypot(dx,dy)||1;svg.appendChild(svgEl71('circle',{cx:pt.x,cy:pt.y,r:3.5,fill:'#334155'}));label(pt,letters71[i],{dx:18*dx/L,dy:18*dy/L+5,size:20});});
