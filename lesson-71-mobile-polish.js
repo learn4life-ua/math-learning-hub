@@ -6,7 +6,6 @@ updateUI = function () {
   const r = regular();
 
   // Апофема MN та ON мають сенс у цій моделі лише для правильної піраміди.
-  // Не залишаємо на екрані неактивні елементи, особливо на телефоні.
   const regularOnlyIds = ['apothem', 'radius'];
   regularOnlyIds.forEach(id => {
     const control = $(id);
@@ -19,7 +18,6 @@ updateUI = function () {
     });
   });
 
-  // Картку «Апофема l» у статистиці також показуємо лише для правильної піраміди.
   const apothemStatCard = C.statL?.parentElement;
   if (apothemStatCard) apothemStatCard.hidden = !r;
 
@@ -28,8 +26,6 @@ updateUI = function () {
 };
 
 // На телефоні при кожному відкритті панелі повертаємося на початок.
-// Інакше після прокручування іншої вкладки верхні кнопки та повзунки
-// могли залишатися вище видимої області й здаватися зниклими.
 const previousOpenPanel71Mobile = openPanel;
 openPanel = function (m) {
   previousOpenPanel71Mobile(m);
@@ -37,6 +33,13 @@ openPanel = function (m) {
     if (mobilePanel) mobilePanel.scrollTop = 0;
   });
 };
+
+function setMobileCamera71() {
+  if (!camera || !controls || !matchMedia('(max-width:1023px)').matches) return;
+  camera.position.set(8.6, 7.1, 10.2);
+  controls.target.set(0, h / 2, 0);
+  controls.update();
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   // Позначаємо базові регулятори, щоб на мобільному ставити їх вище
@@ -48,4 +51,23 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sideControl) sideControl.id = 'baseSideControl71';
   if (heightControl) heightControl.id = 'heightControl71';
   if (basicControls) basicControls.classList.add('mobile-basic-controls-71');
+
+  // Після основної ініціалізації наближаємо модель на телефоні.
+  requestAnimationFrame(() => {
+    setMobileCamera71();
+    resize();
+  });
+
+  const resetBtn = $('reset');
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      if (matchMedia('(max-width:1023px)').matches) {
+        setMobileCamera71();
+      } else {
+        camera.position.set(11, 9, 13);
+        controls.target.set(0, h / 2, 0);
+        controls.update();
+      }
+    };
+  }
 });
