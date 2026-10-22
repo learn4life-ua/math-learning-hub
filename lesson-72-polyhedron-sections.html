@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="uk"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Заняття 72. Перерізи многогранників | Математика</title>
+<meta name="description" content="Інтерактивне дослідження перерізів куба, призми й піраміди. Просторова модель, стереометричне креслення, покрокова побудова та графічна робота.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#115e59">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#142a35;background:#f3f7f8;--ink:#162b3b;--muted:#596d7c;--teal:#0f766e;--tealDark:#115e59;--line:#d9e4e9;--pale:#e9f5f3;--blue:#38bdf8;--gold:#fbbf24}
+*{box-sizing:border-box}body{margin:0}button,select,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.52;cursor:not-allowed}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f0b54a;outline-offset:2px}
+header{background:#115e59;color:#fff;padding:12px clamp(12px,2.3vw,28px);display:flex;justify-content:space-between;gap:16px;align-items:center}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}.brand-icon{width:40px;height:40px;background:#ffffff22;border:1px solid #ffffff44;border-radius:12px;display:grid;place-items:center;font-size:23px}.brand h1{font-size:clamp(16px,2vw,21px);margin:0;letter-spacing:-.025em}.brand small{font-size:12px;color:#d1f2eb}
+.nav{display:flex;gap:7px;flex-wrap:wrap}.nav button{border:1px solid #ffffff35;border-radius:10px;padding:9px 12px;background:#0b504a;color:#fff;font-size:12px;font-weight:700}.nav button[aria-selected="true"]{background:#fff;color:#115e59}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,350px);gap:14px;max-width:1450px;margin:auto;padding:14px;align-items:start}
+.visual{min-width:0}.workfield{background:#111c31;border-radius:19px;overflow:hidden;border:1px solid #27394c;box-shadow:0 10px 34px #12283b16}
+.stage-top{background:#18263a;color:#f8fafc;padding:12px 14px;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}.stage-name{font-size:14px;font-weight:800}.stage-meta{font-size:11px;color:#c5dae2;margin-top:3px}.view-switch{display:flex;gap:5px;padding:4px;background:#0d1828;border:1px solid #31465a;border-radius:12px}.view-switch button{border:0;border-radius:9px;background:none;color:#d6e4ee;padding:9px 11px;font-weight:700;font-size:12px}.view-switch button.active{background:#fff;color:#115e59}
+.viewport{position:relative;height:clamp(430px,66vh,720px);min-height:390px}#canvas3d{width:100%;height:100%;display:block;touch-action:none}.paper{position:absolute;inset:0;display:none;background:#fcfdfc}.paper svg{width:100%;height:100%;display:block}.paper.active{display:block}.paper-note{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:center;pointer-events:none}.paper-note span{font-size:11px;font-weight:700;padding:7px 11px;background:#ffffffed;color:#334155;border:1px solid #dce3e9;border-radius:10px;text-align:center}
+.legend{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid #29394d;background:#172336;color:#cfe0e9;padding:10px 14px;font-size:11px}.legend em{font-style:normal;color:#78e4e1;font-weight:700}.linekey{display:inline-block;width:26px;border-top:2px solid #abbdd0;vertical-align:middle;margin-right:3px}.linekey.dashed{border-top-style:dashed}.linekey.section{border-color:#fbbf24;border-top-width:4px}
+.stepbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:12px}.stepbar strong{font-size:12px}.stepbar input{accent-color:var(--teal);flex:1;min-width:85px}.stepbar .stepno{font-weight:800;color:#0f766e;font-size:12px;min-width:55px}.mini{padding:8px 12px;border:1px solid #b9d1d2;border-radius:10px;background:#eef7f5;color:#115e59;font-weight:800;font-size:12px}
+.feedback-section{padding:14px 17px;background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:12px;line-height:1.5}.feedback-section h2{font-size:13px;margin:0 0 5px}.feedback-section p{font-size:12px;color:#42596b;margin:0}.caption-list{margin:9px 0 0;padding-left:19px;font-size:12px;line-height:1.58;color:#334155}
+.sidebar{background:#fff;border:1px solid var(--line);border-radius:17px;padding:16px;min-width:0;box-shadow:0 5px 24px #12283b0a}.panel[hidden]{display:none!important}.panel h2{font-size:16px;margin:1px 0 8px}.panel .intro{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 14px}.field{padding:13px;border:1px solid #dbe5eb;border-radius:13px;background:#f8fafb;margin:0 0 11px}.field label.title{display:block;font-size:12px;font-weight:800;margin:0 0 7px}.field select{width:100%;padding:10px 9px;background:white;border:1px solid #bbcdd6;border-radius:9px;color:var(--ink);font-size:12px;min-width:0}.range-group{margin:13px 0}.range-head{display:flex;justify-content:space-between;gap:10px;font-size:12px}.range-head b{font-size:12px}.range-head span{font-weight:800;color:#0f766e}.range-group input{width:100%;accent-color:#0f766e;margin-top:8px}.toggle{display:flex;align-items:center;gap:8px;padding:8px 0;font-size:12px}.toggle input{accent-color:var(--teal);width:17px;height:17px}
+.tip{padding:11px 12px;border-left:3px solid #0f766e;background:#ebf7f5;border-radius:8px;font-size:12px;line-height:1.55;margin:12px 0}.tip.warn{border-color:#d97706;background:#fff6e6}.primary{padding:10px 14px;border:none;border-radius:10px;background:#0f766e;color:white;font-size:12px;font-weight:800}.secondary{padding:10px 14px;border:1px solid #c7dade;border-radius:10px;background:#edf6f5;color:#0d5c55;font-size:12px;font-weight:800}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.info-box{padding:10px 8px;border-radius:12px;background:#edf6f5;text-align:center;border:1px solid #cfe7e6}.info-box strong{display:block;color:#115e59;font-size:19px}.info-box small{font-size:10px;color:#587472}
+.method{padding:12px;border:1px solid #dbe6eb;background:#f9fcfc;border-radius:12px;margin:10px 0}.method b{font-size:13px}.method p{margin:6px 0 0;font-size:12px;line-height:1.5;color:#445b69}.method .tag{display:inline-block;background:#dff4ef;color:#11635a;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:800}
+.exercise{padding:12px;border:1px solid #dbe6eb;border-radius:12px;margin-top:9px;line-height:1.5}.exercise strong{font-size:13px}.exercise p,.exercise small{font-size:12px;color:#526778}.exercise small{display:block;margin-top:7px}.exercise button{margin-top:8px}
+.question{padding:14px;border:1px solid #dbe5e9;border-radius:12px;background:#f8fbfb;font-size:13px;line-height:1.55}.answer-list{display:grid;gap:8px;margin-top:12px}.answer-list button{padding:11px 12px;text-align:left;background:#fff;border:1px solid #cddde4;border-radius:10px;font-size:12px;line-height:1.4}.answer-list button.good{border-color:#16a34a;background:#dcfce7;color:#14532d}.answer-list button.bad{border-color:#e11d48;background:#ffe4e6;color:#9f1239}.answer-list button:disabled{cursor:default;opacity:1}.answer-explain{margin-top:11px;padding:11px 12px;font-size:12px;line-height:1.55;background:#f1f5f9;border-radius:10px;color:#334155}
+footer{padding:12px 16px;color:#63798a;font-size:11px;max-width:1450px;margin:auto}.sr{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden}
+@media(max-width:1100px){main{grid-template-columns:minmax(0,1fr) minmax(270px,320px)}}
+@media(max-width:850px){header{display:block}.nav{margin-top:10px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.nav button{padding:10px 3px;font-size:10px;min-width:0}main{display:block;padding:8px}.sidebar{margin-top:10px}.viewport{height:clamp(400px,59dvh,680px);min-height:380px}.stage-top{padding:9px 11px}.stage-name{font-size:12px}.stage-meta{font-size:10px}.view-switch button{font-size:11px}}
+@media(max-width:450px){header{padding:9px 8px}.brand-icon{width:32px;height:32px;font-size:17px}.brand h1{font-size:14px}.brand small{font-size:10px}.nav button{font-size:9px;padding:9px 1px;line-height:1.2}.stage-top{align-items:stretch}.view-switch{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.view-switch button{padding:10px 5px;white-space:normal}.viewport{height:clamp(390px,57dvh,600px)}.legend{font-size:10px;gap:8px}.paper-note span{font-size:10px}.info-grid{gap:5px}.info-box{padding:8px 4px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+</style></head>
+<body>
+<header>
+<div class="brand"><div class="brand-icon" aria-hidden="true">▱</div><div><h1>Заняття 72. Перерізи многогранників</h1><small>Графічна робота · Модуль 10 · Математика, 11 клас</small></div></div>
+<nav class="nav" aria-label="Розділи заняття">
+<button data-tab="model" aria-selected="true">Модель</button>
+<button data-tab="method" aria-selected="false">Алгоритм</button>
+<button data-tab="work" aria-selected="false">Графічна робота</button>
+<button data-tab="quiz" aria-selected="false">Тренажер</button>
+<button data-tab="help" aria-selected="false">Інструкція</button>
+</nav>
+</header>
+<main>
+<section class="visual" aria-label="Інтерактивне зображення">
+<div class="workfield">
+<div class="stage-top">
+<div><div id="sceneTitle" class="stage-name">Куб · переріз площиною</div><div id="sceneSubtitle" class="stage-meta">Січна площина задана трьома неколінеарними точками</div></div>
+<div class="view-switch" role="group" aria-label="Спосіб зображення">
+<button id="show3d" class="active" type="button" aria-pressed="true">◈ 3D-модель</button>
+<button id="show2d" type="button" aria-pressed="false">✎ Зображення на площині</button>
+</div>
+</div>
+<div class="viewport">
+<div id="canvas3d" aria-label="Обертова 3D-модель многогранника і його перерізу"></div>
+<div id="paper" class="paper" role="img" aria-label="Стереометричне креслення многогранника"><svg id="drawing" viewBox="0 0 1000 680"></svg><div class="paper-note"><span>Стереометричне зображення на площині аркуша · невидимі ребра штрихові</span></div></div>
+</div>
+<div class="legend"><span><span class="linekey"></span>видиме ребро</span><span><span class="linekey dashed"></span>невидиме ребро</span><span><span class="linekey section"></span>лінія перерізу</span><em id="crossKind">Переріз: чотирикутник</em></div>
+</div>
+<div class="stepbar"><strong>Покрокова побудова</strong><input id="step" aria-label="Крок побудови" type="range" min="1" max="4" step="1" value="1"><span id="stepNo" class="stepno">1 із 4</span><button class="mini" id="nextStep" type="button">Далі →</button></div>
+<div class="feedback-section"><h2 id="stepName">1. Знайдіть задані точки</h2><p id="stepText">Позначте три точки на ребрах многогранника.</p><ol id="stepList" class="caption-list"></ol></div>
+</section>
+<aside class="sidebar">
+<section class="panel" id="panel-model"><h2>Досліджуй переріз</h2><p class="intro">Обери ситуацію та пересувай задані точки вздовж ребер. Січна площина й переріз перебудовуються автоматично.</p>
+<div class="field"><label class="title" for="preset">Навчальна ситуація</label><select id="preset"></select></div>
+<div class="field"><label class="title">Положення заданих точок</label>
+<div class="range-group"><div class="range-head"><b id="pointP">P на ребрі</b><span id="valP">50%</span></div><input id="posP" type="range" min="15" max="85" value="50"></div>
+<div class="range-group"><div class="range-head"><b id="pointQ">Q на ребрі</b><span id="valQ">50%</span></div><input id="posQ" type="range" min="15" max="85" value="50"></div>
+<div class="range-group"><div class="range-head"><b id="pointR">R на ребрі</b><span id="valR">50%</span></div><input id="posR" type="range" min="15" max="85" value="50"></div>
+</div>
+<div class="field"><label class="title">Показувати</label><label class="toggle"><input id="showFaces" type="checkbox" checked> Напівпрозорі грані</label><label class="toggle"><input id="showSection" type="checkbox" checked> Переріз і його контур</label><label class="toggle"><input id="showLabels" type="checkbox" checked> Буквені позначення</label></div>
+<div class="info-grid"><div class="info-box"><strong id="vertexCount">8</strong><small>вершин тіла</small></div><div class="info-box"><strong id="edgeCount">12</strong><small>ребер тіла</small></div><div class="info-box"><strong id="cutCount">4</strong><small>сторін перерізу</small></div></div>
+<div class="actions"><button id="resetCam" class="secondary">Скинути огляд</button><button id="resetPreset" class="secondary">Повернути точки</button></div>
+<div class="tip warn"><b>Зверни увагу.</b> Довільно сполучати точки, які не лежать в одній грані, не можна. Для побудови потрібне геометричне обґрунтування.</div>
+</section>
+<section class="panel" id="panel-method" hidden><h2>Як будувати переріз</h2><p class="intro">Переріз многогранника площиною - многокутник, сторони якого лежать у гранях цього многогранника.</p>
+<div class="method"><span class="tag">Крок 1</span><p>Познач задані три точки. Три точки, що <b>не лежать на одній прямій</b>, визначають єдину січну площину.</p></div>
+<div class="method"><span class="tag">Крок 2</span><p>Знайди точки, розміщені <b>в одній грані</b>, і сполучи їх. Отриманий відрізок належить лінії перерізу цієї грані.</p></div>
+<div class="method"><span class="tag">Крок 3</span><p>Використай <b>спільні ребра граней</b> і паралельність слідів січної площини в паралельних гранях. У складніших випадках застосуй <b>метод слідів</b>: знайди лінію перетину січної площини з площиною певної грані.</p></div>
+<div class="method"><span class="tag">Крок 4</span><p>З'єднай сусідні точки перерізу в межах відповідних граней. Утворений многокутник має бути <b>замкненим</b>. Врахуй видимі й невидимі ребра на кресленні.</p></div>
+<div class="tip"><b>Важливо.</b> Якщо площина перетинає дві паралельні грані по прямих, ці прямі паралельні між собою. Якщо січна площина паралельна основі призми, переріз рівний основі; у піраміді - подібний до основи.</div>
+<div class="actions"><button class="primary" id="methodToModel">Спробувати на моделі →</button></div></section>
+<section class="panel" id="panel-work" hidden><h2>Графічна робота</h2><p class="intro">Спочатку виконай побудову в зошиті. Лише після цього відкрий усі кроки моделі та перевір результат.</p>
+<div class="exercise"><strong>1. Переріз куба, паралельний основі</strong><p>У кубі ABCDA₁B₁C₁D₁ точки P, Q, R - середини ребер AA₁, BB₁, CC₁. Побудуй переріз площиною PQR. Знайди четверту вершину.</p><button class="secondary task-link" data-preset="0">Показати на моделі</button></div>
+<div class="exercise"><strong>2. Трикутний переріз куба</strong><p>Точки P, Q, R лежать на ребрах AB, AD і AA₁ відповідно. Побудуй переріз площиною PQR та поясни, у яких гранях лежать його сторони.</p><button class="secondary task-link" data-preset="1">Показати на моделі</button></div>
+<div class="exercise"><strong>3. Похилий переріз куба</strong><p>На бічних ребрах AA₁, BB₁, CC₁ позначено точки P, Q, R на різних висотах. Побудуй переріз. Скористайся паралельністю протилежних граней.</p><button class="secondary task-link" data-preset="2">Показати на моделі</button></div>
+<div class="exercise"><strong>4. Переріз трикутної призми</strong><p>У трикутній призмі ABCA₁B₁C₁ точки P, Q, R ділять відповідні бічні ребра в однаковому відношенні від нижньої основи. Побудуй переріз.</p><button class="secondary task-link" data-preset="5">Показати на моделі</button></div>
+<div class="exercise"><strong>5. Переріз правильної чотирикутної піраміди</strong><p>У піраміді MABCD точки P, Q, R лежать відповідно на MA, MB, MC і ділять їх в одному відношенні від вершини M. Побудуй переріз та обґрунтуй його форму.</p><button class="secondary task-link" data-preset="6">Показати на моделі</button></div>
+<div class="exercise"><strong>Додатково</strong><p>Досліди, як січна площина може утворювати п'ятикутний і шестикутний перерізи куба. Для кожного випадку познач перетнуті ребра.</p><button class="secondary task-link" data-preset="4">Дослідити шестикутник</button></div>
+<div class="tip"><b>Самоперевірка.</b> Для кожної побудови запиши: 1) задані точки; 2) грані, у яких проводиш відрізки; 3) використану властивість; 4) назву отриманого многокутника.</div>
+</section>
+<section class="panel" id="panel-quiz" hidden><h2>Тренажер</h2><p class="intro">Перевір, чи вмієш обґрунтовувати побудову, а не лише визначати форму перерізу.</p>
+<div id="questionNo" class="tip">Завдання 1</div><div id="question" class="question"></div><div id="answers" class="answer-list"></div><div id="explain" class="answer-explain" hidden></div>
+<div class="actions" style="margin-top:12px"><button class="primary" id="nextQuestion" disabled>Наступне завдання →</button><button class="secondary" id="restartQuiz">Почати заново</button></div><div id="quizResult" class="tip" hidden></div>
+</section>
+<section class="panel" id="panel-help" hidden><h2>Як працювати</h2><ol class="caption-list" style="font-size:13px;line-height:1.75">
+<li>Обери навчальну ситуацію: куб, призму або піраміду.</li>
+<li>Знайди задані точки P, Q, R на ребрах. Змінюй їхнє положення повзунками.</li>
+<li>У режимі <b>«3D-модель»</b> обертай тіло пальцем або мишею; колесом змінюй масштаб.</li>
+<li>Перейди до <b>«Зображення на площині»</b>. Суцільними лініями показано видимі ребра, штриховими - невидимі.</li>
+<li>Керуй <b>покроковою побудовою</b>: спочатку познач точки, потім побудуй відрізки у спільних гранях, знайди решту вершин і замкни переріз.</li>
+<li>У розділі <b>«Графічна робота»</b> виконай побудови в зошиті й перевір їх на моделі.</li>
+<li>Виконай <b>«Тренажер»</b> і поясни, чому кожна правильна відповідь правильна.</li></ol>
+<div class="tip">Методична основа: Є. П. Нелін, О. Є. Долгова, «Математика», 11 клас, рівень стандарту, § 3 «Побудова перерізів призми й задачі, пов'язані з перерізами». <b>Модель - засіб перевірки, а не заміна геометричного доведення.</b></div>
+<p style="font-size:12px">До <a href="module-10.html">модуля 10 «Многогранники»</a></p>
+</section>
+</aside>
+</main>
+<footer>Математика / Learning Hub · Заняття 72 · Перерізи многогранників · Навчальна інтерактивна модель</footer>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const PR=[
+{title:'Куб · переріз, паралельний основі',kind:'cube',edges:['AA₁','BB₁','CC₁'],t:[.5,.5,.5],note:'Точки на бічних ребрах розташовані на однаковій висоті. Січна площина паралельна основам. Протилежні сторони перерізу паралельні.',strategy:'В одній грані сполучи P і Q, а Q і R - у сусідній. На протилежних паралельних гранях продовж побудову паралельними відрізками. Четверта вершина лежить на DD₁.'},
+{title:'Куб · трикутник біля вершини A',kind:'cube',edges:['AB','AD','AA₁'],t:[.63,.63,.56],note:'Площина перетинає три ребра, що виходять із вершини A. Кожна пара заданих точок лежить у спільній грані.',strategy:'Сполучи P і Q у нижній основі, Q і R у грані ADD₁A₁, R і P у грані ABB₁A₁. Отриманий трикутник замкнений.'},
+{title:'Куб · похилий чотирикутник',kind:'cube',edges:['AA₁','BB₁','CC₁'],t:[.26,.54,.72],note:'Три задані точки мають різні висоти. Площина не паралельна основі. Рівень четвертої точки змінюється разом із положенням P, Q, R.',strategy:'Побудуй PQ і QR у сусідніх бічних гранях. У протилежних гранях проведи паралельні їм сліди січної площини; знайди наступну точку на DD₁.'},
+{title:'Куб · п’ятикутний переріз',kind:'cube',edges:['CD','D₁A₁','AB'],t:[.66,.42,.54],note:'Січна площина проходить крізь п’ять граней куба. Точки P, Q, R не обов’язково лежать попарно в одній грані.',strategy:'Визнач, у яких гранях лежать задані точки. Продовжуй сліди січної площини через спільні ребра суміжних граней. Замкни п’ятикутник.'},
+{title:'Куб · шестикутний переріз',kind:'cube',edges:['DD₁','DA','BB₁'],t:[.79,.21,.55],note:'Січна площина перетинає шість ребер куба, утворюючи шестикутник. Це найбільша можлива кількість сторін перерізу куба.',strategy:'Знайди всі шість точок перетину площини з ребрами куба. З’єднуй тільки точки, що лежать в одній грані, рухаючись по контуру.'},
+{title:'Трикутна призма · переріз, паралельний основі',kind:'tri',edges:['AA₁','BB₁','CC₁'],t:[.48,.48,.48],note:'Переріз площиною, паралельною основам призми, є трикутником, рівним кожній основі.',strategy:'Точки P, Q, R лежать на відповідних бічних ребрах на одній висоті. Сполучи PQ, QR та RP у трьох бічних гранях.'},
+{title:'Чотирикутна піраміда · переріз, паралельний основі',kind:'pyr',edges:['MA','MB','MC'],t:[.57,.57,.57],note:'Площина паралельна основі піраміди. Переріз - чотирикутник, подібний до основи, але менший за неї.',strategy:'Точки P, Q, R поділяють бічні ребра в однаковому відношенні від вершини M. Побудуй PQ і QR; за паралельністю основі знайди четверту вершину на MD.'},
+{title:'Чотирикутна піраміда · похилий переріз',kind:'pyr',edges:['AB','BC','MD'],t:[.50,.45,.60],note:'Січна площина не паралельна основі. Переріз потрібно будувати через сліди площини у відповідних гранях.',strategy:'Спочатку сполучи P і Q у площині основи, потім знайди її перетини із сусідніми бічними гранями. Не сполучай точки довільно через тіло.'}
+];
+const QUIZ=[
+{q:'Що називають перерізом многогранника площиною?',a:['Частину будь-якого ребра','Многокутник, утворений перетином многогранника з площиною','Проєкцію многогранника на екран'],ok:1,why:'Для невиродженого перерізу опуклого многогранника отримуємо многокутник. Його сторони належать граням тіла.'},
+{q:'Скільки неколінеарних точок однозначно визначають площину?',a:['Дві','Три','Чотири'],ok:1,why:'Через три точки, які не лежать на одній прямій, проходить одна і тільки одна площина.'},
+{q:'Коли можна без додаткових побудов сполучити дві задані точки відрізком перерізу?',a:['Якщо вони належать одній грані','Якщо вони лежать на різних, не суміжних ребрах','Завжди'],ok:0,why:'Перетин січної площини з площиною грані - пряма, тому дві її точки визначають шуканий відрізок у межах грані.'},
+{q:'Якщо січна площина перетинає дві паралельні грані по двох різних прямих, то ці прямі…',a:['Перпендикулярні','Мимобіжні','Паралельні'],ok:2,why:'Обидві прямі належать одній січній площині; як перетини з паралельними площинами, вони паралельні.'},
+{q:'Через середини AA₁, BB₁, CC₁ куба проведено площину. Яка фігура є перерізом?',a:['Трикутник','Квадрат','Шестикутник'],ok:1,why:'Ця площина паралельна основам куба й перетинає всі чотири бічні ребра на однаковій висоті.'},
+{q:'Площина перетинає тільки три ребра куба, що виходять з однієї вершини, у внутрішніх точках. Переріз має форму…',a:['Трикутника','Чотирикутника','П’ятикутника'],ok:0,why:'Три точки розміщені у трьох суміжних гранях. Сполучаючи їх у цих гранях, отримуємо трикутник.'},
+{q:'Переріз піраміди площиною, паралельною площині основи, є…',a:['Завжди рівним основі','Подібним до основи','Завжди трикутником'],ok:1,why:'Паралельна основі площина відтинає від бічних ребер пропорційні частини; тому переріз подібний до многокутника основи.'},
+{q:'Яке найбільше число сторін може мати невироджений переріз куба?',a:['Чотири','Шість','Вісім'],ok:1,why:'Куб має шість граней; кожна грань може містити не більш ніж одну сторону невиродженого перерізу.'},
+{q:'Що означає штрихова лінія на стереометричному кресленні?',a:['Невидиме ребро','Завжди висоту','Лінію побудови розгортки'],ok:0,why:'Невидимі ребра на стандартному рисунку зображають штриховими, а видимі - суцільними.'}
+];
+let scene,camera,renderer,controls,modelGroup,svgMode=false,presetIndex=0,step=1,score=0,qid=0,answered=false;
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const mkShape=(kind)=>{
+ let vertices,faces,names;
+ if(kind==='cube'){
+ vertices=[V(-2,0,-2),V(2,0,-2),V(2,0,2),V(-2,0,2),V(-2,4,-2),V(2,4,-2),V(2,4,2),V(-2,4,2)];
+ faces=[[0,3,2,1],[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]];
+ names=['A','B','C','D','A₁','B₁','C₁','D₁'];
+ }else if(kind==='tri'){
+ vertices=[V(-2,0,-1.2),V(2,0,-1.2),V(0,0,2.3),V(-2,4,-1.2),V(2,4,-1.2),V(0,4,2.3)];
+ faces=[[0,2,1],[3,4,5],[0,1,4,3],[1,2,5,4],[2,0,3,5]];
+ names=['A','B','C','A₁','B₁','C₁'];
+ }else{
+ vertices=[V(-2,0,-2),V(2,0,-2),V(2,0,2),V(-2,0,2),V(0,4.7,0)];
+ faces=[[0,3,2,1],[0,1,4],[1,2,4],[2,3,4],[3,0,4]];
+ names=['A','B','C','D','M'];
+ }
+ const edges=[],used=new Set();
+ faces.forEach(f=>f.forEach((a,i)=>{const b=f[(i+1)%f.length],key=[Math.min(a,b),Math.max(a,b)].join('-');if(!used.has(key)){used.add(key);edges.push([a,b]);}}));
+ const center=vertices.reduce((s,p)=>s.add(p.clone()),V(0,0,0)).multiplyScalar(1/vertices.length);
+ return {vertices,faces,names,edges,center};
+};
+function edgeName(sh,e){return sh.names[e[0]]+sh.names[e[1]];}
+function findEdge(sh,label){return sh.edges.find(e=>edgeName(sh,e)===label||edgeName(sh,[e[1],e[0]])===label);}
+function pointOn(sh,label,t){const e=findEdge(sh,label);if(!e)return null;const a=sh.vertices[sh.names.indexOf(label.substring(0,1))];return sh.vertices[e[0]].clone().lerp(sh.vertices[e[1]], edgeName(sh,e)===label?t:1-t);}
+function geometry(){
+ const pr=PR[presetIndex],sh=mkShape(pr.kind);
+ const t=['P','Q','R'].map((_,i)=>+$(i===0?'posP':i===1?'posQ':'posR').value/100);
+ const pts=pr.edges.map((e,i)=>pointOn(sh,e,t[i]));
+ const norm=pts[1].clone().sub(pts[0]).cross(pts[2].clone().sub(pts[0]));
+ const length=norm.length();
+ if(length<1e-7)return {sh,pts,polygon:[],normal:V(0,1,0)};
+ norm.divideScalar(length);
+ const found=[];
+ const insert=(p)=>{if(!found.some(z=>z.distanceToSquared(p)<1e-8))found.push(p.clone());};
+ sh.edges.forEach(e=>{
+ const A=sh.vertices[e[0]],B=sh.vertices[e[1]];
+ const d1=norm.dot(A.clone().sub(pts[0])),d2=norm.dot(B.clone().sub(pts[0]));
+ if(Math.abs(d1)<1e-7)insert(A);
+ if(Math.abs(d2)<1e-7)insert(B);
+ if(d1*d2<-1e-9)insert(A.clone().lerp(B,d1/(d1-d2)));
+ });
+ let polygon=found;
+ if(found.length>=3){
+ const center=found.reduce((s,v)=>s.add(v.clone()),V(0,0,0)).multiplyScalar(1/found.length);
+ const U=found[0].clone().sub(center).normalize();
+ const W=new THREE.Vector3().crossVectors(norm,U).normalize();
+ polygon=found.sort((a,b)=>Math.atan2(a.clone().sub(center).dot(W),a.clone().sub(center).dot(U))-Math.atan2(b.clone().sub(center).dot(W),b.clone().sub(center).dot(U)));
+ }
+ return {sh,pts,polygon,normal:norm};
+}
+const connected=(f,a,b)=>{for(let i=0;i<f.length;i++){const x=f[i],y=f[(i+1)%f.length];if((x===a&&y===b)||(x===b&&y===a))return true;}return false;};
+function outward(sh,f){
+ const A=sh.vertices[f[0]],B=sh.vertices[f[1]],C=sh.vertices[f[2]];
+ let no=B.clone().sub(A).cross(C.clone().sub(A)).normalize();
+ const c=f.reduce((s,i)=>s.add(sh.vertices[i].clone()),V(0,0,0)).multiplyScalar(1/f.length);
+ if(no.dot(c.sub(sh.center))<0)no.negate();
+ return no;
+}
+function renderScene(G){
+ if(!scene)return;
+ modelGroup.traverse(obj=>{if(obj.geometry)obj.geometry.dispose();if(obj.material){const mat=Array.isArray(obj.material)?obj.material:[obj.material];mat.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}});
+ scene.remove(modelGroup);
+ modelGroup=new THREE.Group();scene.add(modelGroup);
+ const sh=G.sh,view=camera.position.clone().sub(controls.target).normalize();
+ if($('showFaces').checked){
+ sh.faces.forEach(f=>{
+  const points=f.map(i=>sh.vertices[i]);const arr=[];
+  for(let i=1;i<f.length-1;i++)arr.push(points[0].x,points[0].y,points[0].z,points[i].x,points[i].y,points[i].z,points[i+1].x,points[i+1].y,points[i+1].z);
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(arr,3));geo.computeVertexNormals();
+  const face=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x118e98,side:THREE.DoubleSide,transparent:true,opacity:.13,depthWrite:false}));
+  modelGroup.add(face);
+ });
+ }
+ const addLine=(a,b,color,dash=false,opacity=1)=>{
+ const geo=new THREE.BufferGeometry().setFromPoints([a,b]),mat=dash?new THREE.LineDashedMaterial({color,dashSize:.12,gapSize:.085,transparent:true,opacity}):new THREE.LineBasicMaterial({color,transparent:true,opacity});
+ const obj=new THREE.Line(geo,mat);if(dash)obj.computeLineDistances();modelGroup.add(obj);
+ };
+ sh.edges.forEach(e=>{
+ const front=sh.faces.some(f=>connected(f,e[0],e[1])&&outward(sh,f).dot(view)>0.03);
+ addLine(sh.vertices[e[0]],sh.vertices[e[1]],front?0xe0f2fe:0x64748b,!front,front?1:.7);
+ });
+ if($('showSection').checked&&step>=2&&G.polygon.length>=3){
+  const pg=G.polygon;
+  if(step===4){
+    const triangles=[];for(let i=1;i<pg.length-1;i++)triangles.push(...pg[0].toArray(),...pg[i].toArray(),...pg[i+1].toArray());
+    const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(triangles,3));
+    modelGroup.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x2dd4bf,side:THREE.DoubleSide,transparent:true,opacity:.38,depthWrite:false})));
+  }
+  for(let i=0;i<pg.length;i++){
+   if(step===3&&i===pg.length-1)continue;
+   const a=pg[i],b=pg[(i+1)%pg.length],knownA=G.pts.some(p=>p.distanceToSquared(a)<1e-5),knownB=G.pts.some(p=>p.distanceToSquared(b)<1e-5);
+   if(step===2&&!(knownA&&knownB))continue;
+   addLine(a,b,0xfbbf24,false,1);
+  }
+ }
+ const dot=(p,color,r)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,12),new THREE.MeshBasicMaterial({color}));m.position.copy(p);modelGroup.add(m);};
+ function label(p,name,color){
+ if(!$('showLabels').checked)return;
+ const can=document.createElement('canvas');can.width=128;can.height=64;const ctx=can.getContext('2d');
+ ctx.font='bold 36px Arial';ctx.fillStyle='#071b2a';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=9;ctx.strokeStyle='#0f172a';ctx.strokeText(name,64,31);ctx.fillStyle=color;ctx.fillText(name,64,31);
+ const tex=new THREE.CanvasTexture(can);tex.minFilter=THREE.LinearFilter;
+ const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));spr.position.copy(p).add(V(0,.22,0));spr.scale.set(.85,.43,1);modelGroup.add(spr);
+ }
+ sh.vertices.forEach((v,i)=>{dot(v,0xe2e8f0,.075);label(v,sh.names[i],'#ffffff');});
+ G.pts.forEach((p,i)=>{dot(p,[0xfbbf24,0xfb7185,0x38bdf8][i],.12);label(p,['P','Q','R'][i],['#fbbf24','#fb7185','#38bdf8'][i]);});
+ if(G.polygon.length>=3&&step>=3&&$('showSection').checked){
+  G.polygon.filter(p=>!G.pts.some(k=>k.distanceToSquared(p)<1e-5)).forEach(p=>dot(p,0x34d399,.09));
+ }
+}
+function svgEl(tag,attrs={},txt){
+ const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+ Object.entries(attrs).forEach(([key,val])=>el.setAttribute(key,String(val)));
+ if(txt!==undefined&&txt!=='')el.textContent=txt;
+ return el;
+}
+function renderPaper(G){
+ const svg=$('drawing');svg.replaceChildren();const sh=G.sh;
+ const view=V(7,7,9).normalize(),right=V(view.z,0,-view.x).normalize(),up=view.clone().cross(right).normalize();
+ const pts=[...sh.vertices,...G.polygon];const raw=pts.map(p=>({x:p.dot(right),y:-p.dot(up)}));
+ const xs=raw.map(q=>q.x),ys=raw.map(q=>q.y);
+ const scale=Math.min(785/Math.max(...xs.map(x=>x-Math.min(...xs)),.1),490/Math.max(...ys.map(y=>y-Math.min(...ys)),.1));
+ const px=(Math.min(...xs)+Math.max(...xs))/2,py=(Math.min(...ys)+Math.max(...ys))/2;
+ const P=p=>({x:500+(p.dot(right)-px)*scale,y:380+(-p.dot(up)-py)*scale});
+ const line=(a,b,col='#334155',width=3,dash='')=>svg.appendChild(svgEl('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:col,'stroke-width':width,'stroke-dasharray':dash,'stroke-linecap':'round'}));
+ const text=(p,s,col='#0f172a',dx=0,dy=-12)=>svg.appendChild(svgEl('text',{x:p.x+dx,y:p.y+dy,fill:col,'font-size':20,'font-family':'Arial, sans-serif','font-weight':'700','paint-order':'stroke',stroke:'#fcfdfc','stroke-width':6,'stroke-linejoin':'round','text-anchor':'middle'},s));
+ const defs=svgEl('defs'),pat=svgEl('pattern',{id:'grid72',width:26,height:26,patternUnits:'userSpaceOnUse'});
+ pat.appendChild(svgEl('path',{d:'M 26 0 L 0 0 0 26',stroke:'#edf2f5','stroke-width':1,fill:'none'}));defs.appendChild(pat);svg.appendChild(defs);svg.appendChild(svgEl('rect',{width:1000,height:680,fill:'url(#grid72)'}));
+ if($('showFaces').checked){
+  sh.faces.filter(f=>outward(sh,f).dot(view)>.02).sort((a,b)=>b.reduce((s,i)=>s+sh.vertices[i].dot(view),0)/b.length-a.reduce((s,i)=>s+sh.vertices[i].dot(view),0)/a.length).forEach(f=>svg.appendChild(svgEl('polygon',{points:f.map(i=>{const q=P(sh.vertices[i]);return q.x+','+q.y}).join(' '),fill:'#bbefe7',opacity:.24,stroke:'none'})));
+ }
+ const far=[],near=[];
+ sh.edges.forEach(e=>{
+  const front=sh.faces.some(f=>connected(f,e[0],e[1])&&outward(sh,f).dot(view)>.02);
+  (front?near:far).push(e);
+ });
+ far.forEach(e=>line(P(sh.vertices[e[0]]),P(sh.vertices[e[1]]),'#8193a7',2.5,'8 7'));
+ near.forEach(e=>line(P(sh.vertices[e[0]]),P(sh.vertices[e[1]]),'#334155',3.1));
+ if($('showSection').checked&&step>=2&&G.polygon.length>=3){
+ const pg=G.polygon;
+ if(step===4)svg.appendChild(svgEl('polygon',{points:pg.map(q=>{const z=P(q);return z.x+','+z.y;}).join(' '),fill:'#5eead4',opacity:.32,stroke:'none'}));
+ for(let i=0;i<pg.length;i++){
+ if(step===3&&i===pg.length-1)continue;
+ const a=pg[i],b=pg[(i+1)%pg.length],ka=G.pts.some(t=>t.distanceToSquared(a)<1e-5),kb=G.pts.some(t=>t.distanceToSquared(b)<1e-5);
+ if(step===2&&!(ka&&kb))continue;
+ line(P(a),P(b),'#d97706',5);
+ }
+ }
+ if($('showLabels').checked)sh.vertices.forEach((p,i)=>text(P(p),sh.names[i],'#334155',i%2===0?-8:10,i<4?23:-14));
+ G.pts.forEach((p,i)=>{
+ const q=P(p);svg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:6.5,fill:['#d97706','#e11d48','#0284c7'][i],stroke:'#fff','stroke-width':2.5}));
+ if($('showLabels').checked)text(q,['P','Q','R'][i],['#b45309','#be123c','#0369a1'][i],12,-13);
+ });
+ if(step>=3&&$('showSection').checked){
+ G.polygon.filter(p=>!G.pts.some(k=>k.distanceToSquared(p)<1e-5)).forEach(p=>{const q=P(p);svg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:5,fill:'#059669',stroke:'#fff','stroke-width':2}));});
+ }
+}
+function init3d(){
+ const box=$('canvas3d');scene=new THREE.Scene();scene.background=new THREE.Color(0x111c31);
+ camera=new THREE.PerspectiveCamera(43,1,.1,100);camera.position.set(10,8,12);
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+ box.appendChild(renderer.domElement);
+ controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.enablePan=false;controls.minDistance=7;controls.maxDistance=33;controls.target.set(0,2,0);
+ scene.add(new THREE.AmbientLight(0xffffff,.86));const light=new THREE.DirectionalLight(0xffffff,.9);light.position.set(7,14,8);scene.add(light);
+ const grid=new THREE.GridHelper(17,17,0x35536a,0x263b52);grid.position.y=-.035;scene.add(grid);
+ modelGroup=new THREE.Group();scene.add(modelGroup);
+ controls.addEventListener('change',()=>{if(!svgMode)renderScene(geometry());});
+ const resize=()=>{const w=Math.max(1,box.clientWidth),h=Math.max(1,box.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);};
+ new ResizeObserver(resize).observe(box);resize();
+ (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
+}
+const kindName=count=>count===3?'трикутник':count===4?'чотирикутник':count===5?'п’ятикутник':count===6?'шестикутник':count+'-кутник';
+function draw(){
+ const G=geometry();
+ $('vertexCount').textContent=G.sh.vertices.length;$('edgeCount').textContent=G.sh.edges.length;$('cutCount').textContent=G.polygon.length;
+ $('crossKind').textContent=G.polygon.length>=3?'Переріз: '+kindName(G.polygon.length):'Переріз: площину не визначено';
+ const heading=['1. Познач задані точки','2. Знайди перші відрізки в гранях','3. Добудуй вершини перерізу','4. Замкни переріз і перевір'][step-1];
+ $('stepNo').textContent=step+' із 4';$('step').value=step;$('nextStep').textContent=step===4?'Спочатку ↺':'Далі →';$('stepName').textContent=heading;
+ const pr=PR[presetIndex];
+ const text=[
+ 'Познач P ∈ '+pr.edges[0]+', Q ∈ '+pr.edges[1]+', R ∈ '+pr.edges[2]+'. Три неколінеарні точки визначають січну площину.',
+ 'Проведи відрізки лише між тими точками, що лежать у спільних гранях многогранника. Якщо такої пари немає - застосуй допоміжні побудови.',
+ pr.strategy,
+ 'Перевір, чи утворився замкнений '+kindName(G.polygon.length)+'. Кожна його сторона повинна лежати у відповідній грані.'
+ ];
+ $('stepText').textContent=text[step-1];
+ const hints=[
+ 'Познач вершини многогранника й задані точки на ребрах.',
+ 'Не сполучай точки через внутрішню частину тіла без пояснення.',
+ 'Використай спільні ребра суміжних граней і паралельність слідів у паралельних гранях.',
+ 'Для креслення: видимі ребра зображай суцільно, невидимі - штрихами.'
+ ];
+ $('stepList').replaceChildren();const li=document.createElement('li');li.textContent=hints[step-1];$('stepList').appendChild(li);
+ if(svgMode)renderPaper(G);else renderScene(G);
+}
+function loadPreset(index){
+ presetIndex=index;const p=PR[index];
+ ['P','Q','R'].forEach((k,i)=>{
+ const input=$('pos'+k);input.value=Math.round(p.t[i]*100);
+ $('point'+k).textContent=k+' ∈ '+p.edges[i];$('val'+k).textContent=input.value+'%';
+ });
+ $('preset').value=index;$('sceneTitle').textContent=p.title;$('sceneSubtitle').textContent='Січна площина (PQR) · '+(p.kind==='pyr'?'піраміда':p.kind==='tri'?'трикутна призма':'куб');
+ step=1;draw();$('panel-model').querySelector('.tip.warn').innerHTML='<b>Обґрунтування.</b> '+p.note+' Зміна повзунків може змінити форму перерізу.';
+}
+function tab(name){
+ document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!=='panel-'+name);
+ document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===name)));
+}
+function setView(is2d){
+ svgMode=is2d;$('paper').classList.toggle('active',is2d);$('show3d').classList.toggle('active',!is2d);$('show2d').classList.toggle('active',is2d);
+ $('show3d').setAttribute('aria-pressed',String(!is2d));$('show2d').setAttribute('aria-pressed',String(is2d));draw();
+}
+function loadQuiz(){
+ const q=QUIZ[qid];answered=false;$('questionNo').textContent='Завдання '+(qid+1)+' із '+QUIZ.length+' · правильних '+score;
+ $('question').textContent=q.q;$('answers').replaceChildren();$('explain').hidden=true;$('quizResult').hidden=true;$('nextQuestion').disabled=true;
+ $('nextQuestion').textContent=qid===QUIZ.length-1?'Переглянути підсумок':'Наступне завдання →';
+ q.a.forEach((a,i)=>{
+ const b=document.createElement('button');b.type='button';b.textContent=String.fromCharCode(65+i)+'. '+a;
+ b.addEventListener('click',()=>{
+ if(answered)return;answered=true;
+ if(i===q.ok)score++;
+ [...$('answers').children].forEach((o,k)=>{o.disabled=true;if(k===q.ok)o.classList.add('good');if(k===i&&i!==q.ok)o.classList.add('bad');});
+ $('explain').hidden=false;$('explain').innerHTML=(i===q.ok?'<b>Правильно.</b> ':'<b>Потрібно повторити.</b> ')+q.why;
+ $('questionNo').textContent='Завдання '+(qid+1)+' із '+QUIZ.length+' · правильних '+score;$('nextQuestion').disabled=false;
+ });
+ $('answers').appendChild(b);
+ });
+}
+function init(){
+ init3d();
+ const select=$('preset');PR.forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+p.title;select.appendChild(o);});
+ select.addEventListener('change',()=>loadPreset(+select.value));
+ ['P','Q','R'].forEach(k=>$('pos'+k).addEventListener('input',e=>{$('val'+k).textContent=e.target.value+'%';draw();}));
+ ['showFaces','showLabels','showSection'].forEach(id=>$(id).addEventListener('change',draw));
+ $('step').addEventListener('input',e=>{step=+e.target.value;draw();});
+ $('nextStep').addEventListener('click',()=>{step=step===4?1:step+1;draw();});
+ $('show2d').addEventListener('click',()=>setView(true));$('show3d').addEventListener('click',()=>setView(false));
+ $('resetCam').addEventListener('click',()=>{camera.position.set(10,8,12);controls.target.set(0,2,0);controls.update();draw();});
+ $('resetPreset').addEventListener('click',()=>loadPreset(presetIndex));
+ document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
+ $('methodToModel').addEventListener('click',()=>tab('model'));
+ document.querySelectorAll('.task-link').forEach(b=>b.addEventListener('click',()=>{tab('model');loadPreset(+b.dataset.preset);setView(true);}));
+ $('nextQuestion').addEventListener('click',()=>{
+ if(!answered)return;
+ if(qid===QUIZ.length-1){
+ $('quizResult').hidden=false;$('quizResult').innerHTML='<b>Тренажер завершено:</b> '+score+' із '+QUIZ.length+'. '+(score===QUIZ.length?'Усі відповіді правильні.':'Переглянь пояснення та повтори спробу.');
+ $('nextQuestion').disabled=true;
+ }else{qid++;loadQuiz();}
+ });
+ $('restartQuiz').addEventListener('click',()=>{score=0;qid=0;loadQuiz();});
+ loadPreset(0);loadQuiz();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+</body></html>
