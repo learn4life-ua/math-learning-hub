@@ -129,7 +129,7 @@ const PR=[
 {title:'Трикутна призма · переріз, паралельний основі',kind:'tri',edges:['AA₁','BB₁','CC₁'],t:[.48,.48,.48],note:'Переріз площиною, паралельною основам призми, є трикутником, рівним кожній основі. Сторони PQ і QR видимі, а сторона PR у задній грані ACC₁A₁ - штрихова.',strategy:'Точки P, Q, R лежать на відповідних бічних ребрах на одній висоті. Сполучи суцільними лініями PQ і QR у передніх бічних гранях та штриховою лінією RP у задній грані.'},
 {title:'Чотирикутна піраміда · переріз, паралельний основі',kind:'pyr',edges:['MA','MB','MC'],t:[.57,.57,.57],note:'Площина паралельна основі піраміди. Переріз - чотирикутник (для правильної піраміди - квадрат), подібний до основи.',strategy:'Точки P, Q, R поділяють бічні ребра в однаковому відношенні від вершини M. Побудуй видимі сторони PQ і QR; за паралельністю основі знайди четверту вершину на MD і проведи штрихові задні сторони.'},
 {title:'Чотирикутна піраміда · похилий переріз',kind:'pyr',edges:['AB','BC','MD'],t:[.50,.45,.60],note:'Січна площина перетинає основу по відрізку PQ і проходить через точку R на бічному ребрі MD, утворюючи п’ятикутний або чотирикутний переріз.',strategy:'Спочатку сполучи P і Q у площині основи ABCD, потім знайди сліди січної площини на бічних гранях піраміди. Враховуй видимість кожної бічної грані.'},
-{title:'Зрізана піраміда · результат паралельного перерізу',kind:'pyr',edges:['MA','MB','MC'],t:[.55,.55,.55],frustum:true,note:'Площина паралельна квадратній основі. Бірюзовим виділена нижня частина - правильна зрізана піраміда; відсічену малу піраміду над площиною показано блідими лініями.',strategy:'Побудуй квадрат PQRT через P, Q, R; точка T належить MD. Нижнє тіло між ABCD і PQRT є зрізаною пірамідою. Малу піраміду MPQRT можна відокремити.'},
+{title:'Зрізана піраміда · результат паралельного перерізу',kind:'pyr',edges:['MA','MB','MC'],t:[.55,.55,.55],frustum:true,note:'Площина паралельна квадратній основі. Бірюзовим виділена нижня частина - правильна зрізана піраміда. D - задня вершина нижньої основи, T - вершина верхньої основи на ребрі MD. Ребро DT з’єднує їх; відсічену малу піраміду біля M показано блідими лініями.',strategy:'Побудуй квадрат PQRT через P, Q, R; точка T належить MD. Обов’язково проведи відрізок DT: він з’єднує задню вершину D нижньої основи з вершиною T верхньої основи. Нижнє тіло між ABCD і PQRT є зрізаною пірамідою.'},
 {title:'Куб · діагональний переріз ACC₁A₁',kind:'cube',edges:['AB','BC','A₁B₁'],t:[0,1,0],fixed:true,pointLabels:['A','C','A₁'],step2Text:'Сполучи точки A і C у нижній основі ABCD. Оскільки нижня основа невидима, діагональ AC зображуємо штриховою лінією.',strategy:'Через точки A і C проходять видимі бічні ребра AA₁ і CC₁. Відміть вершину C₁ і на Кроці 4 замкни видиму діагональ A₁C₁ у верхній основі.',note:'Площина проходить через діагональ AC нижньої основи та бічне ребро AA₁. Переріз ACC₁A₁ - прямокутник (AC - штрихова, а AA₁, CC₁ і A₁C₁ - суцільні).'},
 {title:'Піраміда · діагональний переріз MAC',kind:'pyr',edges:['AB','BC','MA'],t:[0,1,0],fixed:true,pointLabels:['A','C','M'],step2Text:'Сполучи вершини A і C у площині основи ABCD. Оскільки основа невидима, діагональ AC зображуємо штриховою лінією.',strategy:'Сполучи точки A і C з вершиною піраміди M по видимих бічних ребрах MA і MC. Отриманий трикутник MAC - шуканий діагональний переріз.',note:'Площина проходить через вершину M та діагональ AC квадратної основи. Переріз - трикутник MAC (основа AC штрихова, бічні ребра MA і MC - суцільні).'}
 ];
@@ -277,6 +277,15 @@ function renderScene(G){
    addLine(cut,apex,0x5e7485,true,.55);
   }else addLine(sh.vertices[e[0]],sh.vertices[e[1]],front?0xe0f2fe:0x64748b,!front,front?1:.75);
  });
+ // Візуально з'єднуємо задню вершину D з верхньою вершиною T зрізаної піраміди.
+ // Геометрія не змінюється: D належить нижній основі, T - ребру MD.
+ if(PR[presetIndex].frustum && step===4 && G.polygon.length===4){
+   const frac=+$('posP').value/100,shD=sh.vertices[3],shM=sh.vertices[4];
+   const shT=shM.clone().lerp(shD,frac);
+   addLine(shD,shT,0xa8bac9,true,1);
+   addLine(sh.vertices[0],shD,0x8399ac,true,.95);
+   addLine(shD,sh.vertices[2],0x8399ac,true,.95);
+ }
  if($('showSection').checked&&step>=2&&G.polygon.length>=3){
   const pg=G.polygon;
   if(step===4){
@@ -298,7 +307,12 @@ function renderScene(G){
  const tex=new THREE.CanvasTexture(can);tex.minFilter=THREE.LinearFilter;
  const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));spr.position.copy(p).add(V(0,.22,0));spr.scale.set(.85,.43,1);modelGroup.add(spr);
  }
- sh.vertices.forEach((v,i)=>{dot(v,0xe2e8f0,.075);label(v,sh.names[i],'#ffffff');});
+ sh.vertices.forEach((v,i)=>{dot(v,0xe2e8f0,PR[presetIndex].frustum&&i===3?.105:.075);label(v,sh.names[i],'#ffffff');});
+ if(PR[presetIndex].frustum){
+   const frac=+$('posP').value/100,topT=sh.vertices[4].clone().lerp(sh.vertices[3],frac);
+   dot(topT,0x34d399,.13);
+   label(topT,'T','#86efac');
+ }
  if(PR[presetIndex].fixed){
   G.pts.forEach((p,i)=>dot(p,[0xfbbf24,0xfb7185,0x38bdf8][i],.125));
  }else{
@@ -351,6 +365,12 @@ function renderPaper(G){
  };
  far.forEach(e=>renderBodyEdge(e,false));
  near.forEach(e=>renderBodyEdge(e,true));
+ if(PR[presetIndex].frustum&&step===4&&G.polygon.length===4){
+   const frac=+$('posP').value/100,pointD=sh.vertices[3],pointT=sh.vertices[4].clone().lerp(pointD,frac);
+   line(P(pointD),P(pointT),'#64748b',3,'8 6');
+   line(P(sh.vertices[0]),P(pointD),'#64748b',2.7,'8 6');
+   line(P(pointD),P(sh.vertices[2]),'#64748b',2.7,'8 6');
+ }
  if($('showSection').checked&&step>=2&&G.polygon.length>=3){
  const pg=G.polygon;
  if(step===4)svg.appendChild(svgEl('polygon',{points:pg.map(q=>{const z=P(q);return z.x+','+z.y;}).join(' '),fill:'#5eead4',opacity:.32,stroke:'none'}));
@@ -364,6 +384,10 @@ function renderPaper(G){
  cutNear.forEach(([a,b])=>line(P(a),P(b),'#d97706',5));
  }
  if($('showLabels').checked)sh.vertices.forEach((p,i)=>text(P(p),sh.names[i],'#334155',p.x<0?-14:14,p.y<.5?24:-14));
+ if($('showLabels').checked&&PR[presetIndex].frustum){
+   const topT=sh.vertices[4].clone().lerp(sh.vertices[3],+$('posP').value/100);
+   text(P(topT),'T','#047857',-15,-11);
+ }
  if(PR[presetIndex].fixed){
   G.pts.forEach((p,i)=>{const q=P(p);svg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:6.5,fill:['#d97706','#e11d48','#0284c7'][i],stroke:'#fff','stroke-width':2.5}));});
  }else{
