@@ -2,6 +2,7 @@
 <html lang="uk"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Заняття 72. Перерізи многогранників | Математика</title>
+<meta property="og:type" content="website"><meta property="og:locale" content="uk_UA"><meta property="og:title" content="Заняття 72. Перерізи многогранників"><meta property="og:description" content="3D-модель, креслення на площині, покрокова побудова перерізів та графічна робота."><meta property="og:url" content="https://learn4life-ua.github.io/math-learning-hub/lesson-72-polyhedron-sections.html"><meta property="og:image" content="https://learn4life-ua.github.io/math-learning-hub/social-preview-v2.png">
 <meta name="description" content="Інтерактивне дослідження перерізів куба, призми й піраміди. Просторова модель, стереометричне креслення, покрокова побудова та графічна робота.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#115e59">
@@ -300,7 +301,7 @@ function init3d(){
  scene.add(new THREE.AmbientLight(0xffffff,.86));const light=new THREE.DirectionalLight(0xffffff,.9);light.position.set(7,14,8);scene.add(light);
  const grid=new THREE.GridHelper(17,17,0x35536a,0x263b52);grid.position.y=-.035;scene.add(grid);
  modelGroup=new THREE.Group();scene.add(modelGroup);
- controls.addEventListener('change',()=>{if(!svgMode)renderScene(geometry());});
+ controls.addEventListener('end',()=>{if(!svgMode)renderScene(geometry());});
  const resize=()=>{const w=Math.max(1,box.clientWidth),h=Math.max(1,box.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);};
  new ResizeObserver(resize).observe(box);resize();
  (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
