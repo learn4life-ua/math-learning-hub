@@ -58,7 +58,7 @@ footer{padding:12px 16px;color:#63798a;font-size:11px;max-width:1450px;margin:au
 <div id="canvas3d" aria-label="Обертова 3D-модель многогранника і його перерізу"></div>
 <div id="paper" class="paper" role="img" aria-label="Стереометричне креслення многогранника"><svg id="drawing" viewBox="0 0 1000 680"></svg><div class="paper-note"><span>Стереометричне зображення на площині аркуша · лінії на невидимих гранях штрихові</span></div></div>
 </div>
-<div class="legend"><span><span class="linekey"></span>видиме ребро</span><span><span class="linekey dashed"></span>невидиме ребро</span><span><span class="linekey section"></span>переріз (видима грань)</span><span><span class="linekey section-dashed"></span>переріз (невидима грань)</span><em id="crossKind">Переріз: чотирикутник</em></div>
+<div class="legend"><span><span class="linekey"></span>видиме ребро</span><span><span class="linekey dashed"></span>невидиме ребро</span><span><span class="linekey section"></span>переріз (видима лінія)</span><span><span class="linekey section-dashed"></span>переріз (невидима грань)</span><em id="crossKind">Переріз: чотирикутник</em></div>
 </div>
 <div class="stepbar"><strong>Покрокова побудова</strong><input id="step" aria-label="Крок побудови" type="range" min="1" max="4" step="1" value="4"><span id="stepNo" class="stepno">4 із 4</span><button class="mini" id="nextStep" type="button">Спочатку ↺</button><button class="primary" id="showFullCut" type="button">Показати готовий переріз</button></div>
 <div class="feedback-section"><h2 id="stepName">1. Знайдіть задані точки</h2><p id="stepText">Позначте три точки на ребрах многогранника.</p><ol id="stepList" class="caption-list"></ol></div>
@@ -84,7 +84,7 @@ footer{padding:12px 16px;color:#63798a;font-size:11px;max-width:1450px;margin:au
 <div class="method"><span class="tag">Крок 4</span><p>З'єднай сусідні точки перерізу в межах відповідних граней. Утворений многокутник має бути <b>замкненим</b>. Сторони перерізу у видимих гранях зображай суцільними, а в невидимих - штриховими.</p></div>
 <div class="tip"><b>Важливо.</b> Якщо площина перетинає дві паралельні грані по прямих, ці прямі паралельні між собою. Якщо січна площина паралельна основі призми, переріз рівний основі; у піраміді - подібний до основи.</div>
 <div class="method"><span class="tag">Окремий випадок · зрізана піраміда</span><p><b>Зрізана піраміда</b> - частина піраміди між основою та січною площиною, <b>паралельною основі</b>. Сам переріз - <b>верхня основа</b> зрізаної піраміди. Дві її основи - подібні многокутники, а бічні грані - трапеції. Над площиною перерізу залишається менша піраміда, подібна до початкової, яку можна відокремити. <b>Не плутай переріз (плоский многокутник) і зрізану піраміду (просторове тіло).</b></p><p>У <b>правильної зрізаної піраміди</b> бічні грані - рівні рівнобічні трапеції, а їхня спільна висота <i>l</i> - апофема. Додаткова формула: <b>S<sub>біч</sub> = ½(P<sub>1</sub> + P<sub>2</sub>) · l</b>.</p><button class="secondary task-link" data-preset="8" type="button">Побачити зрізану піраміду ↗</button></div>
-<div class="method"><span class="tag">Окремий випадок · діагональний переріз</span><p><b>Діагональний переріз призми</b> проходить через два бічні ребра, які не належать одній бічній грані. У прямої призми це прямокутник, у загальному випадку - паралелограм. У кубі ABCDA₁B₁C₁D₁ переріз площиною ACC₁A₁ - <b>прямокутник ACC₁A₁</b>.</p><p><b>Діагональний переріз піраміди</b> проходить через її вершину та діагональ основи. У чотирикутній піраміді MABCD площина MAC утворює <b>трикутник MAC</b>.</p><div class="actions"><button class="secondary task-link" data-preset="9" type="button">Переріз куба ↗</button><button class="secondary task-link" data-preset="10" type="button">Переріз піраміди ↗</button></div></div>
+<div class="method"><span class="tag">Окремий випадок · діагональний переріз</span><p><b>Діагональний переріз призми</b> проходить через два бічні ребра, які не належать одній бічній грані. У прямої призми це прямокутник, у загальному випадку - паралелограм. У кубі ABCDA₁B₁C₁D₁ переріз площиною ACC₁A₁ - <b>прямокутник ACC₁A₁</b> (діагональ AC нижньої основи невидима, тому штрихова; діагональ A₁C₁ верхньої основи та бічні ребра AA₁, CC₁ - видимі суцільні).</p><p><b>Діагональний переріз піраміди</b> проходить через її вершину та діагональ основи. У чотирикутній піраміді MABCD площина MAC утворює <b>трикутник MAC</b> (основа AC лежить у невидимій грані ABCD - штрихова; бічні сторони MA і MC збігаються з видимими бічними ребрами - суцільні).</p><div class="actions"><button class="secondary task-link" data-preset="9" type="button">Переріз куба ↗</button><button class="secondary task-link" data-preset="10" type="button">Переріз піраміди ↗</button></div></div>
 <div class="actions"><button class="primary" id="methodToModel">Спробувати на моделі →</button></div></section>
 <section class="panel" id="panel-work" hidden><h2>Графічна робота</h2><p class="intro">Спочатку виконай побудову в зошиті. Лише після цього відкрий усі кроки моделі та перевір результат.</p>
 <div class="exercise"><strong>1. Переріз куба, паралельний основі</strong><p>У кубі ABCDA₁B₁C₁D₁ точки P, Q, R - середини ребер AA₁, BB₁, CC₁ відповідно. Побудуй переріз куба площиною PQR та знайди його четверту вершину.</p><button class="secondary task-link" data-preset="0">Показати на моделі</button></div>
@@ -93,8 +93,8 @@ footer{padding:12px 16px;color:#63798a;font-size:11px;max-width:1450px;margin:au
 <div class="exercise"><strong>4. Переріз трикутної призми</strong><p>У трикутній призмі ABCA₁B₁C₁ точки P, Q, R ділять відповідні бічні ребра AA₁, BB₁, CC₁ в однаковому відношенні, рахуючи від вершин нижньої основи A, B, C. Побудуй переріз призми площиною PQR.</p><button class="secondary task-link" data-preset="5">Показати на моделі</button></div>
 <div class="exercise"><strong>5. Переріз правильної чотирикутної піраміди</strong><p>У правильній чотирикутній піраміді MABCD точки P, Q, R лежать відповідно на бічних ребрах MA, MB, MC і ділять їх в однаковому відношенні, рахуючи від вершини M. Побудуй переріз піраміди площиною PQR та обґрунтуй його точну геометричну форму.</p><button class="secondary task-link" data-preset="6">Показати на моделі</button></div>
 <div class="exercise"><strong>6. Зрізана піраміда</strong><p>У правильній чотирикутній піраміді MABCD площина, паралельна основі, перетинає ребра MA, MB, MC, MD у точках P, Q, R, T. Побудуй переріз PQRT. Яку форму він має? Назви просторове тіло між PQRT та ABCD.</p><button class="secondary task-link" data-preset="8">Дослідити зрізану піраміду</button></div>
-<div class="exercise"><strong>7. Діагональний переріз куба</strong><p>У кубі ABCDA₁B₁C₁D₁ побудуй переріз площиною AA₁C. Обґрунтуй, чому ACC₁A₁ - прямокутник, а AC - діагональ основи.</p><button class="secondary task-link" data-preset="9">Побудувати на моделі</button></div>
-<div class="exercise"><strong>8. Діагональний переріз піраміди</strong><p>У правильній чотирикутній піраміді MABCD побудуй переріз площиною MAC. Доведи, що це трикутник MAC.</p><button class="secondary task-link" data-preset="10">Побудувати на моделі</button></div>
+<div class="exercise"><strong>7. Діагональний переріз куба</strong><p>У кубі ABCDA₁B₁C₁D₁ побудуй переріз площиною AA₁C. Обґрунтуй, чому ACC₁A₁ - прямокутник, і поясни, чому діагональ AC зображують штриховою лінією, а A₁C₁ - суцільною.</p><button class="secondary task-link" data-preset="9">Побудувати на моделі</button></div>
+<div class="exercise"><strong>8. Діагональний переріз піраміди</strong><p>У правильній чотирикутній піраміді MABCD побудуй переріз площиною MAC. Доведи, що це рівнобедрений трикутник MAC, і поясни видимість його сторін.</p><button class="secondary task-link" data-preset="10">Побудувати на моделі</button></div>
 <div class="exercise"><strong>Додатково</strong><p>Досліди, як січна площина може утворювати п'ятикутний і шестикутний перерізи куба. Для кожного випадку познач перетнуті ребра та зверни увагу на видимі й невидимі сторони перерізу.</p><button class="secondary task-link" data-preset="4">Дослідити шестикутник</button></div>
 <div class="tip"><b>Самоперевірка.</b> Для кожної побудови запиши: 1) задані точки; 2) грані, у яких проводиш відрізки (та їхню видимість); 3) використану властивість; 4) назву отриманого многокутника.</div>
 </section>
@@ -130,8 +130,8 @@ const PR=[
 {title:'Чотирикутна піраміда · переріз, паралельний основі',kind:'pyr',edges:['MA','MB','MC'],t:[.57,.57,.57],note:'Площина паралельна основі піраміди. Переріз - чотирикутник (для правильної піраміди - квадрат), подібний до основи.',strategy:'Точки P, Q, R поділяють бічні ребра в однаковому відношенні від вершини M. Побудуй видимі сторони PQ і QR; за паралельністю основі знайди четверту вершину на MD і проведи штрихові задні сторони.'},
 {title:'Чотирикутна піраміда · похилий переріз',kind:'pyr',edges:['AB','BC','MD'],t:[.50,.45,.60],note:'Січна площина перетинає основу по відрізку PQ і проходить через точку R на бічному ребрі MD, утворюючи п’ятикутний або чотирикутний переріз.',strategy:'Спочатку сполучи P і Q у площині основи ABCD, потім знайди сліди січної площини на бічних гранях піраміди. Враховуй видимість кожної бічної грані.'},
 {title:'Зрізана піраміда · результат паралельного перерізу',kind:'pyr',edges:['MA','MB','MC'],t:[.55,.55,.55],frustum:true,note:'Площина паралельна квадратній основі. Бірюзовим виділена нижня частина - правильна зрізана піраміда; відсічену малу піраміду над площиною показано блідими лініями.',strategy:'Побудуй квадрат PQRT через P, Q, R; точка T належить MD. Нижнє тіло між ABCD і PQRT є зрізаною пірамідою. Малу піраміду MPQRT можна відокремити.'},
-{title:'Куб · діагональний переріз ACC₁A₁',kind:'cube',edges:['AB','BC','A₁B₁'],t:[0,1,0],fixed:true,pointLabels:['A','C','A₁'],note:'Площина проходить через діагональ AC основи та ребро AA₁. Переріз ACC₁A₁ - прямокутник.',strategy:'Побудуй діагональ AC нижньої основи. Через A і C проведи паралельні ребра AA₁ та CC₁. Сполучи A₁C₁: чотирикутник ACC₁A₁ - прямокутник.'},
-{title:'Піраміда · діагональний переріз MAC',kind:'pyr',edges:['MA','AB','BC'],t:[0,0,1],fixed:true,pointLabels:['M','A','C'],note:'Площина проходить через вершину M та діагональ AC квадратної основи. Переріз - трикутник MAC.',strategy:'Побудуй діагональ AC основи. Сполучи A і C з вершиною M. Контур перерізу утворюють MA, MC та AC.'}
+{title:'Куб · діагональний переріз ACC₁A₁',kind:'cube',edges:['AB','BC','A₁B₁'],t:[0,1,0],fixed:true,pointLabels:['A','C','A₁'],step2Text:'Сполучи точки A і C у нижній основі ABCD. Оскільки нижня основа невидима, діагональ AC зображуємо штриховою лінією.',strategy:'Через точки A і C проходять видимі бічні ребра AA₁ і CC₁. Відміть вершину C₁ і на Кроці 4 замкни видиму діагональ A₁C₁ у верхній основі.',note:'Площина проходить через діагональ AC нижньої основи та бічне ребро AA₁. Переріз ACC₁A₁ - прямокутник (AC - штрихова, а AA₁, CC₁ і A₁C₁ - суцільні).'},
+{title:'Піраміда · діагональний переріз MAC',kind:'pyr',edges:['AB','BC','MA'],t:[0,1,0],fixed:true,pointLabels:['A','C','M'],step2Text:'Сполучи вершини A і C у площині основи ABCD. Оскільки основа невидима, діагональ AC зображуємо штриховою лінією.',strategy:'Сполучи точки A і C з вершиною піраміди M по видимих бічних ребрах MA і MC. Отриманий трикутник MAC - шуканий діагональний переріз.',note:'Площина проходить через вершину M та діагональ AC квадратної основи. Переріз - трикутник MAC (основа AC штрихова, бічні ребра MA і MC - суцільні).'}
 ];
 const QUIZ=[
 {q:'Що називають перерізом многогранника площиною?',a:['Частину будь-якого ребра','Многокутник, утворений перетином многогранника з площиною','Проєкцію многогранника на екран'],ok:1,why:'Для невиродженого перерізу опуклого многогранника отримуємо многокутник. Його сторони належать граням тіла.'},
@@ -180,7 +180,7 @@ function pointOn(sh,label,t){
 }
 function geometry(){
  const pr=PR[presetIndex],sh=mkShape(pr.kind);
- const t=['P','Q','R'].map((_,i)=>+$(i===0?'posP':i===1?'posQ':'posR').value/100);
+ const t=pr.fixed?pr.t:['P','Q','R'].map((_,i)=>+$(i===0?'posP':i===1?'posQ':'posR').value/100);
  const pts=pr.edges.map((e,i)=>pointOn(sh,e,t[i]));
  const norm=pts[1].clone().sub(pts[0]).cross(pts[2].clone().sub(pts[0]));
  const length=norm.length();
@@ -222,9 +222,16 @@ function isCutEdgeVisible(sh,a,b,view){
  });
 }
 function shouldDrawCutEdge(G,i,step){
- const pg=G.polygon,a=pg[i],b=pg[(i+1)%pg.length];
- const isKnown=v=>G.pts.some(p=>p.distanceToSquared(v)<1e-5);
+ const pg=G.polygon,a=pg[i],b=pg[(i+1)%pg.length],pr=PR[presetIndex];
  if(step===4)return true;
+ if(pr.fixed){
+  const isBaseDiag=Math.abs(a.y)<1e-4&&Math.abs(b.y)<1e-4;
+  const isTopDiag=Math.abs(a.y-4)<1e-4&&Math.abs(b.y-4)<1e-4;
+  if(step===2)return isBaseDiag;
+  if(step===3)return !isTopDiag;
+  return false;
+ }
+ const isKnown=v=>G.pts.some(p=>p.distanceToSquared(v)<1e-5);
  if(step===2){
   const anyPair=pg.some((u,k)=>isKnown(u)&&isKnown(pg[(k+1)%pg.length]));
   return anyPair?(isKnown(a)&&isKnown(b)):i===0;
@@ -292,9 +299,13 @@ function renderScene(G){
  const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));spr.position.copy(p).add(V(0,.22,0));spr.scale.set(.85,.43,1);modelGroup.add(spr);
  }
  sh.vertices.forEach((v,i)=>{dot(v,0xe2e8f0,.075);label(v,sh.names[i],'#ffffff');});
- if(!PR[presetIndex].fixed)G.pts.forEach((p,i)=>{dot(p,[0xfbbf24,0xfb7185,0x38bdf8][i],.12);label(p,['P','Q','R'][i],['#fbbf24','#fb7185','#38bdf8'][i]);});
+ if(PR[presetIndex].fixed){
+  G.pts.forEach((p,i)=>dot(p,[0xfbbf24,0xfb7185,0x38bdf8][i],.125));
+ }else{
+  G.pts.forEach((p,i)=>{dot(p,[0xfbbf24,0xfb7185,0x38bdf8][i],.12);label(p,['P','Q','R'][i],['#fbbf24','#fb7185','#38bdf8'][i]);});
+ }
  if(G.polygon.length>=3&&step>=3&&$('showSection').checked){
-  G.polygon.filter(p=>!G.pts.some(k=>k.distanceToSquared(p)<1e-5)).forEach(p=>dot(p,0x34d399,.09));
+  G.polygon.filter(p=>!G.pts.some(k=>k.distanceToSquared(p)<1e-5)).forEach(p=>dot(p,0x34d399,.105));
  }
 }
 function svgEl(tag,attrs={},txt){
@@ -353,12 +364,16 @@ function renderPaper(G){
  cutNear.forEach(([a,b])=>line(P(a),P(b),'#d97706',5));
  }
  if($('showLabels').checked)sh.vertices.forEach((p,i)=>text(P(p),sh.names[i],'#334155',p.x<0?-14:14,p.y<.5?24:-14));
- if(!PR[presetIndex].fixed)G.pts.forEach((p,i)=>{
- const q=P(p);svg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:6.5,fill:['#d97706','#e11d48','#0284c7'][i],stroke:'#fff','stroke-width':2.5}));
- if($('showLabels').checked)text(q,['P','Q','R'][i],['#b45309','#be123c','#0369a1'][i],14,-12);
- });
+ if(PR[presetIndex].fixed){
+  G.pts.forEach((p,i)=>{const q=P(p);svg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:6.5,fill:['#d97706','#e11d48','#0284c7'][i],stroke:'#fff','stroke-width':2.5}));});
+ }else{
+  G.pts.forEach((p,i)=>{
+   const q=P(p);svg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:6.5,fill:['#d97706','#e11d48','#0284c7'][i],stroke:'#fff','stroke-width':2.5}));
+   if($('showLabels').checked)text(q,['P','Q','R'][i],['#b45309','#be123c','#0369a1'][i],14,-12);
+  });
+ }
  if(step>=3&&$('showSection').checked){
- G.polygon.filter(p=>!G.pts.some(k=>k.distanceToSquared(p)<1e-5)).forEach(p=>{const q=P(p);svg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:5,fill:'#059669',stroke:'#fff','stroke-width':2}));});
+ G.polygon.filter(p=>!G.pts.some(k=>k.distanceToSquared(p)<1e-5)).forEach(p=>{const q=P(p);svg.appendChild(svgEl('circle',{cx:q.x,cy:q.y,r:5.5,fill:'#059669',stroke:'#fff','stroke-width':2}));});
  }
 }
 function init3d(){
@@ -389,12 +404,12 @@ function draw(){
   else if((presetIndex===3&&G.polygon.length!==5)||(presetIndex===4&&G.polygon.length!==6))dynamicTitle='Куб · '+kindName(G.polygon.length)+' (змінений випадок)';
  }
  $('sceneTitle').textContent=dynamicTitle;
- const heading=(PR[presetIndex].fixed?['1. Знайди вершини, що визначають площину','2. Побудуй діагональ основи','3. Проведи решту сторін перерізу','4. Перевір готовий діагональний переріз']:['1. Познач задані точки','2. Знайди перші відрізки в гранях','3. Добудуй вершини перерізу','4. Замкни переріз і перевір'])[step-1];
+ const heading=(PR[presetIndex].fixed?['1. Знайди вершини, що визначають площину','2. Побудуй діагональ основи AC','3. Проведи бічні сторони перерізу','4. Перевір готовий діагональний переріз']:['1. Познач задані точки','2. Знайди перші відрізки в гранях','3. Добудуй вершини перерізу','4. Замкни переріз і перевір'])[step-1];
  $('stepNo').textContent=step+' із 4';$('step').value=step;$('nextStep').textContent=step===4?'Спочатку ↺':'Далі →';$('stepName').textContent=heading;
  const pr=PR[presetIndex];
  const text=[
- pr.fixed?'Площину визначено вершинами '+pr.pointLabels.join(', ')+'. Знайди діагональ основи, яка їй належить.':'Познач P ∈ '+pr.edges[0]+', Q ∈ '+pr.edges[1]+', R ∈ '+pr.edges[2]+'. Три неколінеарні точки визначають січну площину.',
- 'Проведи відрізки лише між тими точками, що лежать у спільних гранях многогранника (суцільні у видимих гранях, штрихові - у невидимих).',
+ pr.fixed?'Площину визначено вершинами '+pr.pointLabels.join(', ')+'. Вони виділені кольоровими маркерами.':'Познач P ∈ '+pr.edges[0]+', Q ∈ '+pr.edges[1]+', R ∈ '+pr.edges[2]+'. Три неколінеарні точки визначають січну площину.',
+ pr.step2Text||'Проведи відрізки лише між тими точками, що лежать у спільних гранях многогранника (суцільні у видимих гранях, штрихові - у невидимих).',
  pr.strategy,
  'Перевір, чи утворився замкнений '+kindName(G.polygon.length)+'. Кожна його сторона лежить у відповідній грані й зображена з урахуванням її видимості.'
  ];
