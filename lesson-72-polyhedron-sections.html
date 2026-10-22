@@ -387,7 +387,7 @@ function renderPaper(G){
  cutFar.forEach(([a,b])=>line(P(a),P(b),'#d97706',3.8,'10 7'));
  cutNear.forEach(([a,b])=>line(P(a),P(b),'#d97706',5));
  }
- if($('showLabels').checked)sh.vertices.forEach((p,i)=>text(P(p),sh.names[i],'#334155',p.x<0?-14:14,p.y<.5?24:-14));
+ if($('showLabels').checked)sh.vertices.forEach((p,i)=>{if(PR[presetIndex].frustum&&i===3)return;text(P(p),sh.names[i],'#334155',p.x<0?-14:14,p.y<.5?24:-14);});
  if(PR[presetIndex].frustum){
    const lowerD=P(sh.vertices[3]);
    svg.appendChild(svgEl('circle',{cx:lowerD.x,cy:lowerD.y,r:6.5,fill:'#0f766e',stroke:'#fff','stroke-width':2.2}));
@@ -480,12 +480,10 @@ function loadPreset(index){
  if(linked)syncLinkedControls(Math.round(p.t[0]*100));
  $('preset').value=index;
  $('sceneSubtitle').textContent=p.fixed?'Діагональний переріз · '+(p.kind==='pyr'?'площина MAC':'площина ACC₁A₁'):p.frustum?'Паралельний переріз · нижня основа ABCD, верхня PQRT':'Січна площина (PQR) · '+(p.kind==='pyr'?'піраміда':p.kind==='tri'?'трикутна призма':'куб');
- if(p.frustum){
-   // Низький кут огляду не допускає оптичного перенесення D на верхню основу.
-   camera.position.set(10,5,12);
-   controls.target.set(0,2,0);
-   controls.update();
- }
+ // Для інших прикладів повертаємо звичайний огляд; для зрізаної піраміди - нижчий кут.
+ camera.position.set(10,p.frustum?5:8,12);
+ controls.target.set(0,2,0);
+ controls.update();
  step=4;draw();
  $('panel-model').querySelector('.tip.warn').innerHTML='<b>Початкова конфігурація.</b> '+p.note+
  (p.fixed?' Діагональний переріз проходить через діагональ основи, тому задані вершини зафіксовані.':linked?' Єдиний повзунок зберігає геометричну умову.':' При незалежному пересуванні точок геометричний тип перерізу може змінитися.');
@@ -533,7 +531,7 @@ function init(){
  $('nextStep').addEventListener('click',()=>{step=step===4?1:step+1;draw();});
  $('showFullCut').addEventListener('click',()=>{step=4;$('showSection').checked=true;draw();});
  $('show2d').addEventListener('click',()=>setView(true));$('show3d').addEventListener('click',()=>setView(false));
- $('resetCam').addEventListener('click',()=>{camera.position.set(10,8,12);controls.target.set(0,2,0);controls.update();draw();});
+ $('resetCam').addEventListener('click',()=>{camera.position.set(10,PR[presetIndex].frustum?5:8,12);controls.target.set(0,2,0);controls.update();draw();});
  $('resetPreset').addEventListener('click',()=>loadPreset(presetIndex));
  document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
  $('methodToModel').addEventListener('click',()=>tab('model'));
