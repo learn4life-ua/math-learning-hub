@@ -337,7 +337,7 @@ function loadPreset(index){
  $('point'+k).textContent=k+' ∈ '+p.edges[i];$('val'+k).textContent=input.value+'%';
  });
  $('preset').value=index;$('sceneTitle').textContent=p.title;$('sceneSubtitle').textContent='Січна площина (PQR) · '+(p.kind==='pyr'?'піраміда':p.kind==='tri'?'трикутна призма':'куб');
- step=1;draw();$('panel-model').querySelector('.tip.warn').innerHTML='<b>Обґрунтування.</b> '+p.note+' Зміна повзунків може змінити форму перерізу.';
+ step=1;draw();$('panel-model').querySelector('.tip.warn').innerHTML='<b>Початкова конфігурація.</b> '+p.note+' Після пересування точок форма і властивості перерізу можуть змінитися.';
 }
 function tab(name){
  document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!=='panel-'+name);
@@ -367,7 +367,7 @@ function init(){
  init3d();
  const select=$('preset');PR.forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+p.title;select.appendChild(o);});
  select.addEventListener('change',()=>loadPreset(+select.value));
- ['P','Q','R'].forEach(k=>$('pos'+k).addEventListener('input',e=>{$('val'+k).textContent=e.target.value+'%';draw();}));
+ ['P','Q','R'].forEach(k=>$('pos'+k).addEventListener('input',e=>{$('val'+k).textContent=e.target.value+'%';const pr=PR[presetIndex];const tip=$('panel-model').querySelector('.tip.warn');tip.innerHTML='<b>Дослідницький режим.</b> Точки пересунуто з початкового положення. Умови паралельності або заданого вигляду перерізу могли змінитися. Побудуй переріз для нового положення точок і порівняй результат.';draw();}));
  ['showFaces','showLabels','showSection'].forEach(id=>$(id).addEventListener('change',draw));
  $('step').addEventListener('input',e=>{step=+e.target.value;draw();});
  $('nextStep').addEventListener('click',()=>{step=step===4?1:step+1;draw();});
