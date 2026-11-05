@@ -14,14 +14,14 @@ const tg=arg=>row('<mi mathvariant="normal">tg</mi>',arg);
 const halfAlpha=row(mo('('),f(alpha,mn(2)),mo(')'));
 const S=label=>sub('S',label), eq=mo('='), plus=mo('+'), times=mo('·');
 const formulas={base:M(row(S('осн'),eq,pi,sq(r))),side:M(row(S('біч'),eq,mn(2),pi,r,h)),full:M(row(S('повн'),eq,mn(2),pi,r,row(mo('('),h,plus,r,mo(')')))),axial:M(row(S('ось'),eq,mn(2),r,h)),diag:M(row(d,eq,root(row(mn(4),sq(r),plus,sq(h)))))};
-const state={tab:'model',r:3,h:6,az:.48,elev:.42,zoom:1,labels:true,hidden:true,rotationMode:false,angle:360,section:'axial',cut:.5,unfold:0};
+const state={tab:'model',r:3,h:6,az:.48,elev:.42,zoom:1,labels:true,hidden:true,rotationMode:false,angle:360,section:'axial',cut:.5,unfold:0,view:'3d'};
 function areas(radius,height){return{base:Math.PI*radius*radius,side:2*Math.PI*radius*height,full:2*Math.PI*radius*(height+radius),axial:2*radius*height};}
 let rotationFrame=0,taskIndex=0,solutionStep=0,quizIndex=0,quizScore=0,quizAnswered=false,quizSelected=null;
 const canvas=$('scene'),ctx=canvas.getContext('2d');
 let width=800,height=440,pixelRatio=1;
 function resize(){const box=canvas.getBoundingClientRect();if(!box.width)return;width=box.width;height=box.height;pixelRatio=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*pixelRatio);canvas.height=Math.round(height*pixelRatio);draw();}
 new ResizeObserver(resize).observe(canvas);
-function palette(){const dark=document.documentElement.dataset.theme==='dark';return{ink:dark?'#e8f1fa':'#18324f',muted:dark?'#abc0d3':'#657f92',edge:dark?'#96dbe0':'#276570',body:dark?'#246773':'#b1e3e8',top:dark?'#347c86':'#d1f0ee',amber:dark?'#f0c16c':'#b77a18',fill:dark?'#b9893b66':'#f8cb6788',red:dark?'#ffa8a2':'#c75f5b',grid:dark?'#2b4053':'#dce6ed',paper:dark?'#15243a':'#ffffff'};}
+function palette(){return{ink:'#e8f1fa',muted:'#94a3b8',edge:'#81d9dc',body:'#247481',top:'#4b9d9f',amber:'#fcd34d',fill:'#f0b94f88',red:'#fda4af',grid:'#334155',paper:'#0f172a'};}
 let scale=30;
 function project(x,y,z){const ca=Math.cos(state.az),sa=Math.sin(state.az),ce=Math.cos(state.elev),se=Math.sin(state.elev);return[width*.5+scale*(ca*x-sa*z),height*.53-scale*(ce*(y-state.h/2)-se*(sa*x+ca*z))];}
 function line3(points,color,dashed=false,lineWidth=1.7){if(points.length<2)return;ctx.beginPath();points.forEach((p,i)=>{const q=project(...p);i?ctx.lineTo(...q):ctx.moveTo(...q);});ctx.strokeStyle=color;ctx.lineWidth=lineWidth;ctx.setLineDash(dashed?[5,5]:[]);ctx.stroke();ctx.setLineDash([]);}
@@ -36,7 +36,7 @@ function drawCylinder(){const c=palette(),R=state.r,H=state.h;const left=-state.
  if(state.hidden)line3(ring(0,right,left+2*Math.PI),c.edge,true,1.5);
  line3(ring(0,left,right),c.edge);
  for(const theta of [left,right])line3([[R*Math.cos(theta),0,R*Math.sin(theta)],[R*Math.cos(theta),H,R*Math.sin(theta)]],c.edge);
- if(state.tab==='sections'){
+ if(state.view!=='net'&&state.tab==='sections'){
   if(state.section==='axial'){
    const th=-state.az+.22;const A=[R*Math.cos(th),0,R*Math.sin(th)],B=[-A[0],0,-A[2]],AA=[A[0],H,A[2]],BB=[B[0],H,B[2]];
    poly3([A,B,BB,AA],c.fill);line3([AA,BB],c.amber,false,2.5);line3([A,B],c.amber,true,2);line3([A,AA],c.amber,false,2);line3([B,BB],c.amber,true,2);
@@ -72,7 +72,7 @@ function drawNet(){const c=palette(),u=state.unfold/100,R=state.r,H=state.h,k=1-
  for(const cx of [width*.30,width*.70]){ctx.beginPath();ctx.arc(cx,cy,baseRad,0,2*Math.PI);ctx.fillStyle=c.top;ctx.fill();ctx.strokeStyle=c.edge;ctx.stroke();ctx.fillStyle=c.ink;ctx.fillText('r',cx,cy+5);}
  ctx.fillStyle=c.muted;ctx.font='12px system-ui';ctx.fillText('Дві рівні основи',width/2,height-13);
 }
-function draw(){if(!ctx||!width)return;setupDraw();if(state.tab==='net')drawNet();else if(state.rotationMode&&state.tab==='model')drawRotation();else drawCylinder();}
+function draw(){if(!ctx||!width)return;setupDraw();if(state.view==='net')drawNet();else {const az=state.az,elev=state.elev;if(state.view==='plane'){state.az=0;state.elev=.3;}if(state.rotationMode&&state.tab==='model')drawRotation();else drawCylinder();state.az=az;state.elev=elev;}}
 function sync(){const{r:R,h:H}=state;const values=areas(R,H);$('radiusOut').textContent=number(R)+' см';$('heightOut').textContent=number(H)+' см';
  for(const[key,coeff]of [['Base',R*R],['Side',2*R*H],['Full',2*R*(H+R)]]){$('metric'+key).textContent=number(coeff)+'π см²';$('metric'+key+'D').textContent='≈ '+number(values[key.toLowerCase()])+' см²';}
  $('modelInfo').innerHTML='<div class="factlist"><div class="fact"><b>Основи</b><br>Два рівні круги в паралельних площинах.</div><div class="fact"><b>Твірна й висота</b><br>l = h = '+number(H)+' см. Усі твірні паралельні та рівні.</div><div class="fact"><b>Вісь</b><br>Пряма через центри основ O і O₁.</div></div><div class="note" style="margin-top:16px">'+(state.rotationMode?'Прямокутник зі сторонами r та h обертається навколо сторони h. Його друга сторона задає радіус, а не діаметр.':'Знайди на моделі радіус r і діаметр 2r = '+number(2*R)+' см. Чому основа - круг, а не коло?')+'</div>';
@@ -82,11 +82,20 @@ function sync(){const{r:R,h:H}=state;const values=areas(R,H);$('radiusOut').text
  draw();
 }
 function stopRotation(){cancelAnimationFrame(rotationFrame);rotationFrame=0;$('animateRotation').textContent='▶ Обертати прямокутник';}
-function setTab(tab){stopRotation();state.tab=tab;document.querySelectorAll('[role=tab]').forEach(b=>{const active=b.dataset.tab===tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});document.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=p.id!=='panel-'+tab);
- if(['model','sections','net'].includes(tab)){$('panel-'+tab).append($('lab'));$('modelControls').hidden=tab!=='model';$('sectionControls').hidden=tab!=='sections';$('netControls').hidden=tab!=='net';$('stageTitle').textContent={model:'Прямий круговий циліндр',sections:'Досліджуй перерізи',net:'Від поверхні до прямокутника'}[tab];$('stageSub').textContent={model:'Основи - круги, бічна поверхня - криволінійна',sections:'Площина, фігура перерізу та її площа',net:'Розріз уздовж твірної · Дві окремі основи'}[tab];$('stageTag').textContent=tab==='net'?'Розгортання':'3D-модель';$('sideTitle').textContent={model:'Змінюй розміри',sections:'Обери площину',net:'Досліди розгортку'}[tab];$('hiddenLines').closest('label').hidden=tab==='net';$('labels').closest('label').hidden=tab==='net';resize();sync();}
+function setView(view){state.view=view;['view3d','viewPlane','viewNet'].forEach((id,i)=>$(id).setAttribute('aria-pressed',String(view===['3d','plane','net'][i])));$('stageTitle').textContent=view==='net'?'Розгортка поверхні циліндра':view==='plane'?'Циліндр на площині':'Прямий круговий циліндр';$('stageTag').textContent=view==='net'?'Розгортання':view==='plane'?'Площинне зображення':'3D-модель';resize();draw();}
+function openPanel(){if(!matchMedia('(max-width:1023px)').matches)return;$('lessonPanel').classList.add('open');$('panelBackdrop').hidden=false;$('lessonPanel').setAttribute('role','dialog');$('lessonPanel').setAttribute('aria-modal','true');$('panelClose').focus();}
+function closePanel(){$('lessonPanel').classList.remove('open');$('panelBackdrop').hidden=true;$('lessonPanel').removeAttribute('role');$('lessonPanel').removeAttribute('aria-modal');$('tab-'+state.tab).focus();resize();}
+function setTab(tab,open=true){stopRotation();state.tab=tab;document.querySelectorAll('[role=tab]').forEach(b=>{const active=b.dataset.tab===tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});document.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=p.id!=='panel-'+tab);
+ if(['model','sections','net'].includes(tab)){$('panel-'+tab).insertBefore($('sharedControls'),tab==='model'?$('modelControls'):tab==='sections'?$('sectionControls'):$('netControls'));$('modelControls').hidden=tab!=='model';$('sectionControls').hidden=tab!=='sections';$('netControls').hidden=tab!=='net';$('stageSub').textContent={model:'Два рівні круги та бічна поверхня',sections:'Осьовий переріз або переріз, паралельний основам',net:'Прямокутник 2πr × h і два круги'}[tab];$('sideTitle').textContent='Змінюй розміри';$('hiddenLines').closest('label').hidden=tab==='net';$('labels').closest('label').hidden=tab==='net';setView(tab==='net'?'net':state.view==='net'?'3d':state.view);sync();}
  else if(tab==='tasks')renderTask();else if(tab==='quiz')renderQuiz();
+ if(open)openPanel();resize();
 }
-document.querySelectorAll('[role=tab]').forEach((b,i,all)=>{b.addEventListener('click',()=>setTab(b.dataset.tab));b.addEventListener('keydown',e=>{let n;if(e.key==='ArrowRight')n=(i+1)%all.length;else if(e.key==='ArrowLeft')n=(i+all.length-1)%all.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=all.length-1;else return;e.preventDefault();setTab(all[n].dataset.tab);all[n].focus();});});
+document.querySelectorAll('[role=tab]').forEach((b,i,all)=>{b.addEventListener('click',()=>setTab(b.dataset.tab));b.addEventListener('keydown',e=>{let n;if(e.key==='ArrowRight')n=(i+1)%all.length;else if(e.key==='ArrowLeft')n=(i+all.length-1)%all.length;else if(e.key==='Home')n=0;else if(e.key==='End')n=all.length-1;else return;e.preventDefault();setTab(all[n].dataset.tab);if(!matchMedia('(max-width:1023px)').matches)all[n].focus();});});
+$('view3d').onclick=()=>{setView('3d');};$('viewPlane').onclick=()=>{stopRotation();setView('plane');};$('viewNet').onclick=()=>{setTab('net',false);setView('net');if(matchMedia('(max-width:1023px)').matches)openPanel();};
+$('panelClose').onclick=closePanel;$('panelBackdrop').onclick=closePanel;
+document.addEventListener('keydown',e=>{if(!$('lessonPanel').classList.contains('open'))return;if(e.key==='Escape')closePanel();if(e.key==='Tab'){const focusable=[...$('lessonPanel').querySelectorAll('button,input,a,select,[tabindex="0"]')].filter(el=>!el.disabled&&el.getClientRects().length);if(e.shiftKey&&document.activeElement===focusable[0]){e.preventDefault();focusable.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===focusable.at(-1)){e.preventDefault();focusable[0].focus();}}});
+window.addEventListener('resize',()=>{if(!matchMedia('(max-width:1023px)').matches){$('lessonPanel').classList.remove('open');$('panelBackdrop').hidden=true;$('lessonPanel').removeAttribute('role');$('lessonPanel').removeAttribute('aria-modal');}resize();});
+
 for(const[id,key]of [['radius','r'],['height','h']])$(id).addEventListener('input',e=>{state[key]=Number(e.target.value);sync();});
 $('labels').addEventListener('change',e=>{state.labels=e.target.checked;draw();});$('hiddenLines').addEventListener('change',e=>{state.hidden=e.target.checked;draw();});
 function setRotation(on){stopRotation();state.rotationMode=on;$('showRotation').setAttribute('aria-pressed',String(on));$('showCylinder').setAttribute('aria-pressed',String(!on));$('rotationControls').hidden=!on;sync();}
@@ -97,7 +106,7 @@ $('axial').onclick=()=>setSection('axial');$('horizontal').onclick=()=>setSectio
 $('unfold').oninput=e=>{state.unfold=Number(e.target.value);sync();};$('netClosed').onclick=()=>{state.unfold=0;$('unfold').value=0;sync();};$('netOpen').onclick=()=>{state.unfold=100;$('unfold').value=100;sync();};
 function zoom(delta){state.zoom=Math.max(.65,Math.min(1.4,state.zoom+delta));draw();}$('zoomIn').onclick=()=>zoom(.1);$('zoomOut').onclick=()=>zoom(-.1);$('resetView').onclick=()=>{state.az=.48;state.elev=.42;state.zoom=1;draw();};
 let pointer=null;canvas.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});canvas.addEventListener('pointermove',e=>{if(!pointer)return;state.az+=(e.clientX-pointer.x)*.008;state.elev=Math.max(.18,Math.min(1.05,state.elev+(e.clientY-pointer.y)*.005));pointer={x:e.clientX,y:e.clientY};draw();});canvas.addEventListener('pointerup',()=>pointer=null);canvas.addEventListener('pointercancel',()=>pointer=null);canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-'].includes(e.key)){e.preventDefault();if(e.key==='ArrowLeft')state.az-=.15;if(e.key==='ArrowRight')state.az+=.15;if(e.key==='ArrowUp')state.elev=Math.min(1.05,state.elev+.08);if(e.key==='ArrowDown')state.elev=Math.max(.18,state.elev-.08);if(e.key==='+'||e.key==='=')zoom(.1);if(e.key==='-')zoom(-.1);draw();}});
-function applyTheme(){const dark=document.documentElement.dataset.theme==='dark';$('theme').textContent=dark?'☀ Світла тема':'◐ Темна тема';$('theme').setAttribute('aria-pressed',String(dark));draw();}$('theme').onclick=()=>{const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;try{localStorage.setItem('math-hub-theme',theme);}catch(e){}applyTheme();};
+
 $('helpOpen').onclick=()=>$('help').showModal();$('helpClose').onclick=()=>$('help').close();$('help').addEventListener('click',e=>{if(e.target===$('help')){const b=$('help').getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)$('help').close();}});
 const theory=[
  ['1 · Тіла обертання','Тіло обертання','<p>Тіло обертання утворюється обертанням плоскої фігури навколо фіксованої прямої - осі обертання. З однієї фігури можна отримати різні тіла, змінюючи вісь.</p><p><b>Осьовий переріз</b> утворює площина, що містить вісь. Поперечний переріз довільного тіла обертання не завжди круг: можливі кільця, кілька концентричних кілець або вироджений переріз.</p>'],
@@ -146,5 +155,5 @@ function renderQuiz(){const t=quiz[quizIndex];$('quizContent').innerHTML='<div c
 }
 // Pure calculations are exposed for deterministic verification without external dependencies.
 window.CylinderLesson={areas,tasks,quiz};
-applyTheme();sync();resize();
+document.documentElement.dataset.theme='light';setTab('model',false);sync();resize();
 })();
