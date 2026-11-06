@@ -89,21 +89,33 @@ function drawRotation(){drawGround();const c=palette(),R=state.r,H=state.h,A=sta
  const last=start+A,base=[R*Math.cos(last),0,R*Math.sin(last)],top=[base[0],H,base[2]];poly3([[0,0,0],base,top,[0,H,0]],c.fill,c.amber);line3([[0,0,0],[0,H,0]],c.red,false,2.5);
  label3('r',[base[0]*.55,0,base[2]*.55],c.amber,5,17);label3('h',[0,H*.5,0],c.red,-20,0);label3(state.angle+'°',[0,H+.5,0],c.amber,0,-10);
 }
-function drawNet(){const c=palette(),u=state.unfold/100,R=state.r,H=state.h,k=1-u;const span=2*Math.PI*R;
- // Isometric-like view of an isometric bending: x = r sin(kθ)/k, z = r(1-cos(kθ))/k.
- // The arc-length derivative is exactly r, so every intermediate surface preserves length.
- const sx=Math.min((width-85)/(span+2),(height-70)/(H+2*R))*state.zoom;
- function pp(t,y){const x=k<.0001?R*t:R*Math.sin(k*t)/k,z=k<.0001?0:R*(1-Math.cos(k*t))/k;return[width*.5+sx*(x+.20*z*(1-u)),45+sx*(H-y)+sx*.14*z*(1-u)];}
- const strips=[];for(let i=0;i<100;i++){const t1=-Math.PI+2*Math.PI*i/100,t2=-Math.PI+2*Math.PI*(i+1)/100;strips.push({depth:Math.cos(k*(t1+t2)/2),t1,t2});}
- strips.sort((a,b)=>a.depth-b.depth).forEach(({t1,t2})=>{ctx.beginPath();[pp(t1,0),pp(t2,0),pp(t2,H),pp(t1,H)].forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fillStyle=c.body;ctx.fill();});
- for(const y of [0,H]){ctx.beginPath();for(let i=0;i<=150;i++){const q=pp(-Math.PI+2*Math.PI*i/150,y);i?ctx.lineTo(...q):ctx.moveTo(...q);}ctx.strokeStyle=c.edge;ctx.lineWidth=2;ctx.stroke();}
- for(const t of [-Math.PI,Math.PI]){ctx.beginPath();ctx.moveTo(...pp(t,0));ctx.lineTo(...pp(t,H));ctx.stroke();}
- const tl=pp(-Math.PI,H),br=pp(Math.PI,0);ctx.font='600 14px system-ui';ctx.fillStyle=c.ink;ctx.textAlign='center';ctx.fillText('h = '+number(H)+' см',br[0]+17,(br[1]+tl[1])/2);
- const bottom=pp(0,0);ctx.fillText('2πr = '+number(2*R)+'π см',width/2,bottom[1]+23);
- // Detached bases are shown as true circles with a common scale.
- const baseRad=R*sx,cy=height-baseRad-12;
- for(const cx of [width*.27,width*.73]){ctx.beginPath();ctx.arc(cx,cy,baseRad,0,2*Math.PI);ctx.fillStyle=c.top;ctx.fill();ctx.strokeStyle=c.edge;ctx.stroke();ctx.fillStyle=c.ink;ctx.fillText('r',cx,cy+5);}
- ctx.fillStyle=c.muted;ctx.font='12px system-ui';ctx.fillText('Дві рівні основи',width/2,height-13);
+function drawNet(){
+ const c=palette(),u=state.unfold/100,R=state.r,H=state.h;
+ // First hinge the rigid bases out, then unroll the lateral surface.
+ // Its arc length remains 2πr throughout: |d(x,z)/dt| = r.
+ const hinge=Math.min(1,u/.35)*Math.PI/2,bend=Math.max(0,(u-.35)/.65),k=1-bend;
+ const surface=(t,y)=>[k<1e-6?R*t:R*Math.sin(k*t)/k,y,k<1e-6?0:R*(1-Math.cos(k*t))/k];
+ const base=(t,top)=>[R*Math.sin(t),(top?H:0)+(top?1:-1)*R*(1-Math.cos(t))*Math.sin(hinge),R*(1-Math.cos(t))*Math.cos(hinge)];
+ const raw=p=>[p[0]+.18*(1-u)*p[2],-p[1]+.38*(1-u)*p[2]];
+ const rings=[false,true].map(top=>Array.from({length:121},(_,i)=>base(i*Math.PI/60,top)));
+ const edges=[0,H].map(y=>Array.from({length:121},(_,i)=>surface(-Math.PI+i*Math.PI/60,y)));
+ const all=[...rings.flat(),...edges.flat()].map(raw),xs=all.map(p=>p[0]),ys=all.map(p=>p[1]);
+ const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ const fit=Math.min((width-100)/(maxX-minX),(height-55)/(maxY-minY))*state.zoom;
+ const pp=p=>{const q=raw(p);return[width/2+fit*(q[0]-(minX+maxX)/2),height/2+fit*(q[1]-(minY+maxY)/2)];};
+ function path(points,fill,stroke,dash=false){ctx.beginPath();points.forEach((p,i)=>{const q=pp(p);i?ctx.lineTo(...q):ctx.moveTo(...q);});if(fill){ctx.closePath();ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.3;ctx.setLineDash(dash?[4,4]:[]);ctx.stroke();ctx.setLineDash([]);}}
+ function text(str,p,dx=0,dy=0,color=c.ink){const q=pp(p);ctx.font='600 13px system-ui';ctx.textAlign='center';ctx.fillStyle=color;ctx.fillText(str,q[0]+dx,q[1]+dy);}
+ path(rings[0],'#5eead430',c.edge);
+ const strips=Array.from({length:100},(_,i)=>{const t=-Math.PI+(i+.5)*Math.PI/50;return{t,depth:Math.cos(k*t)};}).sort((a,b)=>a.depth-b.depth);
+ if(bend>.999)path([surface(-Math.PI,0),surface(Math.PI,0),surface(Math.PI,H),surface(-Math.PI,H)],'#2c969d70');
+ else for(const{t}of strips)path([surface(t-Math.PI/100,0),surface(t+Math.PI/100,0),surface(t+Math.PI/100,H),surface(t-Math.PI/100,H)],'#2c969d70');
+ edges.forEach(e=>path(e,null,c.edge));
+ for(const t of [-Math.PI,Math.PI])path([surface(t,0),surface(t,H)],null,c.edge);
+ path(rings[1],'#5eead430',c.edge);
+ // Bases are hinged at the two opposite long edges, with one common scale.
+ for(const top of [false,true]){const center=[0,(top?H:0)+(top?1:-1)*R*Math.sin(hinge),R*Math.cos(hinge)],end=[R,center[1],center[2]];path([center,end],null,c.amber);text('r',[(center[0]+end[0])/2,center[1],center[2]],0,-5,c.amber);}
+ if(u>.97){text('2πr = '+number(2*R)+'π см',[-Math.PI*R*.58,0,0],0,20);text('h = '+number(H),[Math.PI*R,H/2,0],30,4);}
+ else text(state.unfold<=35?'Відкриваємо основи':'Розгортаємо бічну поверхню',[0,H/2,0],0,0);
 }
 function draw(){if(!ctx||!width)return;setupDraw();if(state.view==='net')drawNet();else {const az=state.az,elev=state.elev;if(state.view==='plane'){state.az=0;state.elev=.3;}if(state.rotationMode&&(state.tab==='model'||state.task===2))drawRotation();else drawCylinder();state.az=az;state.elev=elev;}}
 function sync(){const{r:R,h:H}=state;const values=areas(R,H);$('radiusOut').textContent=number(R)+' см';$('heightOut').textContent=number(H)+' см';
@@ -115,7 +127,7 @@ function sync(){const{r:R,h:H}=state;const values=areas(R,H);$('radiusOut').text
  draw();
 }
 function stopRotation(){cancelAnimationFrame(rotationFrame);rotationFrame=0;$('animateRotation').textContent='▶ Обертати прямокутник';}
-function setView(view){state.view=view;['view3d','viewPlane','viewNet'].forEach((id,i)=>$(id).setAttribute('aria-pressed',String(view===['3d','plane','net'][i])));$('stageTitle').textContent=view==='net'?'Розгортка поверхні циліндра':view==='plane'?'Циліндр на площині':'Прямий круговий циліндр';$('stageTag').textContent=view==='net'?'Розгортання':view==='plane'?'Площинне зображення':'3D-модель';resize();draw();}
+function setView(view){state.view=view;for(const id of ['surfaceStyle','wireStyle','spinModel'])$(id).hidden=view==='net';['view3d','viewPlane','viewNet'].forEach((id,i)=>$(id).setAttribute('aria-pressed',String(view===['3d','plane','net'][i])));$('stageTitle').textContent=view==='net'?'Розгортка поверхні циліндра':view==='plane'?'Циліндр на площині':'Прямий круговий циліндр';$('stageTag').textContent=view==='net'?'Розгортання':view==='plane'?'Площинне зображення':'3D-модель';resize();draw();}
 function openPanel(){if(!matchMedia('(max-width:1023px)').matches)return;$('lessonPanel').classList.add('open');$('panelBackdrop').hidden=false;$('lessonPanel').setAttribute('role','dialog');$('lessonPanel').setAttribute('aria-modal','true');$('panelClose').focus();}
 function closePanel(){$('lessonPanel').classList.remove('open');$('panelBackdrop').hidden=true;$('lessonPanel').removeAttribute('role');$('lessonPanel').removeAttribute('aria-modal');$('tab-'+state.tab).focus();resize();}
 function setTab(tab,open=true){stopRotation();if(tab!=='tasks'&&state.task!==null){state.r=3;state.h=6;$('radius').value=3;$('height').value=6;}state.tab=tab;if(tab!=='tasks'){state.task=null;state.rotationMode=false;}document.querySelectorAll('[role=tab]').forEach(b=>{const active=b.dataset.tab===tab;b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});document.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=p.id!=='panel-'+tab);
@@ -136,7 +148,9 @@ $('showCylinder').onclick=()=>setRotation(false);$('showRotation').onclick=()=>s
 $('animateRotation').onclick=()=>{if(rotationFrame){stopRotation();return;}state.angle=0;const start=performance.now();$('animateRotation').textContent='Ⅱ Зупинити';function frame(now){state.angle=Math.min(360,Math.round((now-start)/14));$('rotation').value=state.angle;$('rotationOut').textContent=state.angle+'°';draw();if(state.angle<360)rotationFrame=requestAnimationFrame(frame);else stopRotation();}rotationFrame=requestAnimationFrame(frame);};
 function setSection(name){state.section=name;$('axial').setAttribute('aria-pressed',String(name==='axial'));$('horizontal').setAttribute('aria-pressed',String(name==='horizontal'));$('cutHeightWrap').hidden=name==='axial';sync();}
 $('axial').onclick=()=>setSection('axial');$('horizontal').onclick=()=>setSection('horizontal');$('cutHeight').oninput=e=>{state.cut=Number(e.target.value)/100;sync();};
-$('unfold').oninput=e=>{state.unfold=Number(e.target.value);sync();};$('netClosed').onclick=()=>{state.unfold=0;$('unfold').value=0;sync();};$('netOpen').onclick=()=>{state.unfold=100;$('unfold').value=100;sync();};
+let netFrame=0;
+function animateNet(target){cancelAnimationFrame(netFrame);const from=state.unfold,start=performance.now();function step(now){const t=Math.min(1,(now-start)/1800);state.unfold=Math.round(from+(target-from)*(t*t*(3-2*t)));$('unfold').value=state.unfold;sync();netFrame=t<1?requestAnimationFrame(step):0;}netFrame=requestAnimationFrame(step);}
+$('unfold').oninput=e=>{cancelAnimationFrame(netFrame);state.unfold=Number(e.target.value);sync();};$('netClosed').onclick=()=>animateNet(0);$('netOpen').onclick=()=>animateNet(100);
 $('surfaceStyle').onclick=()=>{state.transparent=!state.transparent;$('surfaceStyle').setAttribute('aria-pressed',String(state.transparent));draw();};
 $('wireStyle').onclick=()=>{state.wire=!state.wire;$('wireStyle').setAttribute('aria-pressed',String(state.wire));draw();};
 function zoom(delta){state.zoom=Math.max(.65,Math.min(2.8,state.zoom+delta));draw();}$('spinModel').onclick=toggleSpin;$('zoomIn').onclick=()=>zoom(.15);$('zoomOut').onclick=()=>zoom(-.1);$('resetView').onclick=()=>{state.az=.48;state.elev=.42;state.zoom=1;draw();};
