@@ -14,28 +14,50 @@ const tg=arg=>row('<mi mathvariant="normal">tg</mi>',arg);
 const halfAlpha=row(mo('('),f(alpha,mn(2)),mo(')'));
 const S=label=>sub('S',label), eq=mo('='), plus=mo('+'), times=mo('·');
 const formulas={base:M(row(S('осн'),eq,pi,sq(r))),side:M(row(S('біч'),eq,mn(2),pi,r,h)),full:M(row(S('повн'),eq,mn(2),pi,r,row(mo('('),h,plus,r,mo(')')))),axial:M(row(S('ось'),eq,mn(2),r,h)),diag:M(row(d,eq,root(row(mn(4),sq(r),plus,sq(h)))))};
-const state={tab:'model',r:3,h:6,az:.48,elev:.42,zoom:1,labels:true,hidden:true,rotationMode:false,angle:360,section:'axial',cut:.5,unfold:0,view:'3d',task:null,sectionAngle:.35,taskD:10,taskAlpha:35,taskA:2,taskCentral:60,taskBeta:40,taskK:2,taskScenario:0};
+const state={tab:'model',r:3,h:6,az:.48,elev:.42,zoom:1,transparent:true,wire:false,labels:true,hidden:true,rotationMode:false,angle:360,section:'axial',cut:.5,unfold:0,view:'3d',task:null,sectionAngle:.35,taskD:10,taskAlpha:35,taskA:2,taskCentral:60,taskBeta:40,taskK:2,taskScenario:0};
 function areas(radius,height){return{base:Math.PI*radius*radius,side:2*Math.PI*radius*height,full:2*Math.PI*radius*(height+radius),axial:2*radius*height};}
 let rotationFrame=0,taskIndex=0,solutionStep=0,quizIndex=0,quizScore=0,quizAnswered=false,quizSelected=null;
 const canvas=$('scene'),ctx=canvas.getContext('2d');
 let width=800,height=440,pixelRatio=1;
 function resize(){const box=canvas.getBoundingClientRect();if(!box.width)return;width=box.width;height=box.height;pixelRatio=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*pixelRatio);canvas.height=Math.round(height*pixelRatio);draw();}
 new ResizeObserver(resize).observe(canvas);
-function palette(){return{ink:'#e8f1fa',muted:'#94a3b8',edge:'#81d9dc',body:'#247481',top:'#4b9d9f',amber:'#fcd34d',fill:'#f0b94f88',red:'#fda4af',grid:'#334155',paper:'#0f172a'};}
+function palette(){return{ink:'#e8f1fa',muted:'#94a3b8',edge:'#99e5df',body:'#2c969d80',top:'#68c9bf50',amber:'#fcd34d',fill:'#f0b94f88',red:'#fda4af',grid:'#334155',paper:'#0f172a'};}
 let scale=30;
 function project(x,y,z){const ca=Math.cos(state.az),sa=Math.sin(state.az),ce=Math.cos(state.elev),se=Math.sin(state.elev);return[width*.5+scale*(ca*x-sa*z),height*.53-scale*(ce*(y-state.h/2)-se*(sa*x+ca*z))];}
 function line3(points,color,dashed=false,lineWidth=1.7){if(points.length<2)return;ctx.beginPath();points.forEach((p,i)=>{const q=project(...p);i?ctx.lineTo(...q):ctx.moveTo(...q);});ctx.strokeStyle=color;ctx.lineWidth=lineWidth;ctx.setLineDash(dashed?[5,5]:[]);ctx.stroke();ctx.setLineDash([]);}
 function poly3(points,fill,stroke=null){ctx.beginPath();points.forEach((p,i)=>{const q=project(...p);i?ctx.lineTo(...q):ctx.moveTo(...q);});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}}
-function label3(text,p,color,dx=0,dy=0){if(!state.labels)return;const[x,y]=project(...p);ctx.font='600 15px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=5;ctx.strokeStyle=palette().paper;ctx.strokeText(text,x+dx,y+dy);ctx.fillStyle=color;ctx.fillText(text,x+dx,y+dy);}
+function label3(text,p,color,dx=0,dy=0){if(!state.labels)return;const[x,y]=project(...p);ctx.font='600 13px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=2.5;ctx.strokeStyle=palette().paper;ctx.strokeText(text,x+dx,y+dy);ctx.fillStyle=color;ctx.fillText(text,x+dx,y+dy);}
 function ring(y,start=0,end=2*Math.PI,rad=state.r){const out=[];for(let i=0;i<=100;i++){const t=start+(end-start)*i/100;out.push([rad*Math.cos(t),y,rad*Math.sin(t)]);}return out;}
 function setupDraw(){ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);ctx.clearRect(0,0,width,height);scale=Math.min((width-70)/(2*state.r),(height-55)/(state.h*Math.cos(state.view==='plane'?.3:state.elev)+2*state.r*Math.sin(state.view==='plane'?.3:state.elev)))*state.zoom;}
+function drawGround(){
+ if(state.view==='plane')return;
+ const extent=Math.max(state.r*3.5,9),step=extent/12;
+ for(let i=-12;i<=12;i++){
+  const color=i===0?'#33415570':'#33415545';
+  line3([[-extent,-.08,i*step],[extent,-.08,i*step]],color,false,.65);
+  line3([[i*step,-.08,-extent],[i*step,-.08,extent]],color,false,.65);
+ }
+}
 function drawCylinder(){const c=palette(),R=state.r,H=state.h;const left=-state.az,right=Math.PI-state.az,front=Math.PI/2-state.az;
- const body=[...ring(0,left,right),...ring(H,right,left)];poly3(body,c.body);
- // Top disk is visible; rear bottom arc is hidden by the lateral surface.
- poly3(ring(H),c.top);line3(ring(H),c.edge);
- if(state.hidden)line3(ring(0,right,left+2*Math.PI),c.edge,true,1.5);
- line3(ring(0,left,right),c.edge);
- for(const theta of [left,right])line3([[R*Math.cos(theta),0,R*Math.sin(theta)],[R*Math.cos(theta),H,R*Math.sin(theta)]],c.edge);
+ drawGround();
+ const body=[...ring(0,left,right),...ring(H,right,left)];
+ if(!state.wire){
+  poly3(ring(0),state.transparent?'#2dd4bf12':'#205d66');
+  const gradient=ctx.createLinearGradient(width/2-scale*R,0,width/2+scale*R,0);
+  gradient.addColorStop(0,state.transparent?'#2dd4bf35':'#24636c');
+  gradient.addColorStop(.38,state.transparent?'#5eead466':'#439f9e');
+  gradient.addColorStop(1,state.transparent?'#22d3ee25':'#205c6b');
+  poly3(body,gradient);
+  poly3(ring(H),state.transparent?'#5eead435':'#4e9998');
+ }
+ line3(ring(H),c.edge,false,1.2);
+ if(state.hidden)line3(ring(0,right,left+2*Math.PI),'#8bd5d0a0',true,1);
+ line3(ring(0,left,right),c.edge,false,1.3);
+ for(const theta of [left,right])line3([[R*Math.cos(theta),0,R*Math.sin(theta)],[R*Math.cos(theta),H,R*Math.sin(theta)]],c.edge,false,1.2);
+ if(state.wire)for(let i=0;i<12;i++){
+  const t=i*Math.PI/6,hidden=Math.sin(t+state.az)<0;
+  if(!hidden||state.hidden)line3([[R*Math.cos(t),0,R*Math.sin(t)],[R*Math.cos(t),H,R*Math.sin(t)]],hidden?'#8bd5d065':'#8bd5d0a0',hidden,.8);
+ }
  if(state.view!=='net'&&state.tab==='sections'){
   if(state.section==='axial'){
    const th=state.sectionAngle;const A=[R*Math.cos(th),0,R*Math.sin(th)],B=[-A[0],0,-A[2]],AA=[A[0],H,A[2]],BB=[B[0],H,B[2]];
@@ -45,9 +67,9 @@ function drawCylinder(){const c=palette(),R=state.r,H=state.h;const left=-state.
  }
  line3([[0,-.35,0],[0,H+.5,0]],c.muted,true,1.3);
  const rp=[R*Math.cos(.35),0,R*Math.sin(.35)];line3([[0,0,0],rp],c.edge,true);
- const gp=[R*Math.cos(.35),0,R*Math.sin(.35)],gpt=[gp[0],H,gp[2]];line3([gp,gpt],c.red,Math.sin(.35+state.az)<0,2.8);label3('A',gp,c.red,14,7);if(state.task!==3&&state.task!==5)label3('A₁',gpt,c.red,14,-5);if(state.task!==null)drawTaskGeometry();
+ const gp=[R*Math.cos(.35),0,R*Math.sin(.35)],gpt=[gp[0],H,gp[2]];line3([gp,gpt],c.red,Math.sin(.35+state.az)<0,1.8);label3('A',gp,c.ink,14,7);if(state.task!==3&&state.task!==5)label3('A₁',gpt,c.ink,14,-7);if(state.task!==null)drawTaskGeometry();
  if(state.tab!=='sections'&&state.task===null){label3('r',[rp[0]*.55,0,rp[2]*.55],c.ink,12,10);label3('h = l',[gp[0],H*.55,gp[2]],c.red,23,0);}
- label3('O',[0,0,0],c.ink,-15,0);label3('O₁',[0,H,0],c.ink,-17,-4);if(state.task===null)label3('Вісь',[0,H+.4,0],c.muted,23,-10);
+ label3('O',[0,0,0],c.ink,-15,0);label3('O₁',[0,H,0],c.ink,-17,-4);if(state.task===null)label3('Вісь',[0,H+.4,0],c.muted,25,-10);
 }
 let spinFrame=0;
 function toggleSpin(){if(state.view!=='3d')setView('3d');if(spinFrame){cancelAnimationFrame(spinFrame);spinFrame=0;$('spinModel').textContent='▶ Обертати';return;}let previous=performance.now();$('spinModel').textContent='Ⅱ Зупинити';function tick(now){state.az+=(now-previous)*.0005;previous=now;draw();spinFrame=requestAnimationFrame(tick);}spinFrame=requestAnimationFrame(tick);}
@@ -60,7 +82,7 @@ function drawTaskGeometry(){const c=palette(),R=state.r,H=state.h,n=state.task,t
  if(n===4){label3('k = '+number(state.taskK),[0,H+.4,0],c.amber,0,-15);}
 }
 
-function drawRotation(){const c=palette(),R=state.r,H=state.h,A=state.angle*Math.PI/180,start=-state.az;const strips=[];
+function drawRotation(){drawGround();const c=palette(),R=state.r,H=state.h,A=state.angle*Math.PI/180,start=-state.az;const strips=[];
  for(let i=0;i<100;i++){const t1=start+A*i/100,t2=start+A*(i+1)/100;strips.push({depth:Math.sin((t1+t2)/2+state.az),pts:[[R*Math.cos(t1),0,R*Math.sin(t1)],[R*Math.cos(t2),0,R*Math.sin(t2)],[R*Math.cos(t2),H,R*Math.sin(t2)],[R*Math.cos(t1),H,R*Math.sin(t1)]]});}
  strips.sort((a,b)=>a.depth-b.depth).forEach(s=>poly3(s.pts,s.depth>0?c.body:c.top));
  if(A>0){poly3([[0,H,0],...ring(H,start,start+A)],c.top);line3(ring(H,start,start+A),c.edge);line3(ring(0,start,start+A),c.edge,true);}
@@ -115,6 +137,8 @@ $('animateRotation').onclick=()=>{if(rotationFrame){stopRotation();return;}state
 function setSection(name){state.section=name;$('axial').setAttribute('aria-pressed',String(name==='axial'));$('horizontal').setAttribute('aria-pressed',String(name==='horizontal'));$('cutHeightWrap').hidden=name==='axial';sync();}
 $('axial').onclick=()=>setSection('axial');$('horizontal').onclick=()=>setSection('horizontal');$('cutHeight').oninput=e=>{state.cut=Number(e.target.value)/100;sync();};
 $('unfold').oninput=e=>{state.unfold=Number(e.target.value);sync();};$('netClosed').onclick=()=>{state.unfold=0;$('unfold').value=0;sync();};$('netOpen').onclick=()=>{state.unfold=100;$('unfold').value=100;sync();};
+$('surfaceStyle').onclick=()=>{state.transparent=!state.transparent;$('surfaceStyle').setAttribute('aria-pressed',String(state.transparent));draw();};
+$('wireStyle').onclick=()=>{state.wire=!state.wire;$('wireStyle').setAttribute('aria-pressed',String(state.wire));draw();};
 function zoom(delta){state.zoom=Math.max(.65,Math.min(2.8,state.zoom+delta));draw();}$('spinModel').onclick=toggleSpin;$('zoomIn').onclick=()=>zoom(.15);$('zoomOut').onclick=()=>zoom(-.1);$('resetView').onclick=()=>{state.az=.48;state.elev=.42;state.zoom=1;draw();};
 let pointer=null;canvas.addEventListener('pointerdown',e=>{pointer={x:e.clientX,y:e.clientY};canvas.setPointerCapture(e.pointerId);});canvas.addEventListener('pointermove',e=>{if(!pointer)return;state.az+=(e.clientX-pointer.x)*.008;state.elev=Math.max(.18,Math.min(1.05,state.elev+(e.clientY-pointer.y)*.005));pointer={x:e.clientX,y:e.clientY};draw();});canvas.addEventListener('pointerup',()=>pointer=null);canvas.addEventListener('pointercancel',()=>pointer=null);canvas.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-'].includes(e.key)){e.preventDefault();if(e.key==='ArrowLeft')state.az-=.15;if(e.key==='ArrowRight')state.az+=.15;if(e.key==='ArrowUp')state.elev=Math.min(1.05,state.elev+.08);if(e.key==='ArrowDown')state.elev=Math.max(.18,state.elev-.08);if(e.key==='+'||e.key==='=')zoom(.1);if(e.key==='-')zoom(-.1);draw();}});
 
