@@ -70,8 +70,8 @@ function drawRotation(){const c=palette(),R=state.r,H=state.h,A=state.angle*Math
 function drawNet(){const c=palette(),u=state.unfold/100,R=state.r,H=state.h,k=1-u;const span=2*Math.PI*R;
  // Isometric-like view of an isometric bending: x = r sin(kθ)/k, z = r(1-cos(kθ))/k.
  // The arc-length derivative is exactly r, so every intermediate surface preserves length.
- const sx=Math.min((width-85)/(span+2),(height-150)/(H+2*R+1))*state.zoom;
- function pp(t,y){const x=k<.0001?R*t:R*Math.sin(k*t)/k,z=k<.0001?0:R*(1-Math.cos(k*t))/k;return[width*.5+sx*(x+.20*z*(1-u)),height*.47-sx*(y-H/2)+sx*.14*z*(1-u)];}
+ const sx=Math.min((width-85)/(span+2),(height-70)/(H+2*R))*state.zoom;
+ function pp(t,y){const x=k<.0001?R*t:R*Math.sin(k*t)/k,z=k<.0001?0:R*(1-Math.cos(k*t))/k;return[width*.5+sx*(x+.20*z*(1-u)),45+sx*(H-y)+sx*.14*z*(1-u)];}
  const strips=[];for(let i=0;i<100;i++){const t1=-Math.PI+2*Math.PI*i/100,t2=-Math.PI+2*Math.PI*(i+1)/100;strips.push({depth:Math.cos(k*(t1+t2)/2),t1,t2});}
  strips.sort((a,b)=>a.depth-b.depth).forEach(({t1,t2})=>{ctx.beginPath();[pp(t1,0),pp(t2,0),pp(t2,H),pp(t1,H)].forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();ctx.fillStyle=c.body;ctx.fill();});
  for(const y of [0,H]){ctx.beginPath();for(let i=0;i<=150;i++){const q=pp(-Math.PI+2*Math.PI*i/150,y);i?ctx.lineTo(...q):ctx.moveTo(...q);}ctx.strokeStyle=c.edge;ctx.lineWidth=2;ctx.stroke();}
@@ -79,8 +79,8 @@ function drawNet(){const c=palette(),u=state.unfold/100,R=state.r,H=state.h,k=1-
  const tl=pp(-Math.PI,H),br=pp(Math.PI,0);ctx.font='600 14px system-ui';ctx.fillStyle=c.ink;ctx.textAlign='center';ctx.fillText('h = '+number(H)+' см',br[0]+17,(br[1]+tl[1])/2);
  const bottom=pp(0,0);ctx.fillText('2πr = '+number(2*R)+'π см',width/2,bottom[1]+23);
  // Detached bases are shown as true circles with a common scale.
- const baseRad=Math.min(30,R*sx*.55),cy=height-48;
- for(const cx of [width*.30,width*.70]){ctx.beginPath();ctx.arc(cx,cy,baseRad,0,2*Math.PI);ctx.fillStyle=c.top;ctx.fill();ctx.strokeStyle=c.edge;ctx.stroke();ctx.fillStyle=c.ink;ctx.fillText('r',cx,cy+5);}
+ const baseRad=R*sx,cy=height-baseRad-12;
+ for(const cx of [width*.27,width*.73]){ctx.beginPath();ctx.arc(cx,cy,baseRad,0,2*Math.PI);ctx.fillStyle=c.top;ctx.fill();ctx.strokeStyle=c.edge;ctx.stroke();ctx.fillStyle=c.ink;ctx.fillText('r',cx,cy+5);}
  ctx.fillStyle=c.muted;ctx.font='12px system-ui';ctx.fillText('Дві рівні основи',width/2,height-13);
 }
 function draw(){if(!ctx||!width)return;setupDraw();if(state.view==='net')drawNet();else {const az=state.az,elev=state.elev;if(state.view==='plane'){state.az=0;state.elev=.3;}if(state.rotationMode&&(state.tab==='model'||state.task===2))drawRotation();else drawCylinder();state.az=az;state.elev=elev;}}
