@@ -50,7 +50,7 @@ function drawCylinder(){const c=palette(),R=state.r,H=state.h;const left=-state.
  label3('O',[0,0,0],c.ink,-15,0);label3('O₁',[0,H,0],c.ink,-17,-4);label3('Вісь',[0,H+.4,0],c.muted,23,-10);
 }
 let spinFrame=0;
-function toggleSpin(){if(spinFrame){cancelAnimationFrame(spinFrame);spinFrame=0;$('spinModel').textContent='▶ Обертати';return;}let previous=performance.now();$('spinModel').textContent='Ⅱ Зупинити';function tick(now){state.az+=(now-previous)*.0005;previous=now;draw();spinFrame=requestAnimationFrame(tick);}spinFrame=requestAnimationFrame(tick);}
+function toggleSpin(){if(state.view!=='3d')setView('3d');if(spinFrame){cancelAnimationFrame(spinFrame);spinFrame=0;$('spinModel').textContent='▶ Обертати';return;}let previous=performance.now();$('spinModel').textContent='Ⅱ Зупинити';function tick(now){state.az+=(now-previous)*.0005;previous=now;draw();spinFrame=requestAnimationFrame(tick);}spinFrame=requestAnimationFrame(tick);}
 
 function drawTaskGeometry(){const c=palette(),R=state.r,H=state.h,n=state.task,th=state.sectionAngle;
  if([0,1,2].includes(n)){const A=[R*Math.cos(th),0,R*Math.sin(th)],B=[-A[0],0,-A[2]],AA=[A[0],H,A[2]],BB=[B[0],H,B[2]];poly3([A,B,BB,AA],c.fill);line3([A,B,BB,AA,A],c.amber,true,2.4);label3('2r',[0,0,0],c.amber,0,21);label3('h',[A[0],H*.5,A[2]],c.amber,18,0);if(n!==0){line3([B,AA],c.amber,false,3);label3('d',[0,H*.5,0],c.amber,-16,0);if(n===1)label3('α',B,c.amber,21,-19);}}
