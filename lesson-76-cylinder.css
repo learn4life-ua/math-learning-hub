@@ -20,3 +20,7 @@ main.shell{max-width:1420px;width:100%;padding:14px 16px;flex:1;min-height:0;dis
 /* Keep the live task construction large; no thumbnail diagrams in the teaching panel. */
 #taskModelControls .range{margin:12px 0}#taskModelReadout{padding:8px 10px;background:#f0fdfa;border-radius:8px;color:#115e59}#taskShowModel{width:100%;margin-top:8px}.viewtools{flex-wrap:wrap;max-width:calc(100% - 20px);justify-content:flex-end}#spinModel{color:#a7f3d0;border-color:#0f766e}
 @media(max-width:1023px){.canvaswrap{min-height:130px}.stagehead{padding-bottom:4px}.scene-views{padding-bottom:2px}.viewtools{top:4px}.viewtools button{min-height:30px}.lesson-panel .taskgrid{gap:10px}}
+
+/* Match the airy transparent construction in lessons 70 and 71. */
+.viewtools{position:static;max-width:none;justify-content:center;flex:none;padding:3px 10px 10px;gap:5px}.viewtools button{min-height:30px}.viewtools button[aria-pressed=true]{background:#254b50;border-color:#5b9c99;color:#d6fffa}.canvaswrap{background:transparent}.scene-views button[aria-pressed=true]{background:#f0fdfa;color:#115e59;border-color:#ccfbf1}
+@media(max-width:1023px){.viewtools{padding:2px 8px 5px;gap:4px}.viewtools button{font-size:9px;padding:4px 7px;min-height:28px}}
